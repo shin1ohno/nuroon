@@ -13,15 +13,145 @@ const matrix = (feed_back_pattern, device) => {
         case "connected":
             device.setLEDMatrix([
                 0, 1, 1, 1, 1, 1, 1, 1, 0,
-                1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 0, 1, 1, 1, 1,
+                1, 1, 1, 0, 0, 1, 1, 1, 1,
+                1, 1, 0, 1, 0, 1, 1, 1, 0,
+                1, 0, 1, 1, 0, 1, 1, 0, 1,
+                0, 1, 1, 1, 0, 1, 0, 1, 1,
+                1, 1, 1, 1, 0, 0, 1, 1, 1,
+                1, 1, 1, 1, 0, 1, 1, 1, 1,
                 0, 1, 1, 1, 1, 1, 1, 1, 0
             ], 255, 5000);
+            break;
+        case "volume_changed_9":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_8":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_7":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_6":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_5":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_4":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_3":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_2":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_1":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
+            break;
+        case "volume_changed_0":
+            device.setLEDMatrix([
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0
+            ], 255, 5000, {onion_skinning: 1});
             break;
         default:
             device.setLEDMatrix([
@@ -44,6 +174,7 @@ nuroon.bootstrap({
         logger.info("Nuroon started.")
         logger.debug(`Nuimo(${device.uuid}) connected.`);
         matrix("connected", device);
+        logger.info(`Battery: ${device.batteryLevel}%.`)
     },
     press: (device) => {
         logger.debug("Button pressed");
@@ -99,10 +230,19 @@ nuroon.bootstrap({
                 break;
         }
     },
-    rotate: (device, amount) => {
+    rotate: async (device, amount) => {
         logger.debug(`Rotated by ${amount}`);
-        roon.turn_volume(amount);
-        matrix("volume_changed", device);
+        roon.turn_volume(amount / 7.0).then(
+            volume => Math.round(10 * (volume.value - volume.min) / (volume.max - volume.min))
+        ).then(
+            rel_vol => Math.min(rel_vol, 9)
+        ).then(
+            rel_vol => {
+                matrix(`volume_changed_${rel_vol}`, device);
+                logger.info(`volume: ${rel_vol}`);
+                return rel_vol;
+            }
+        )
     },
     fly: (device, direction, speed) => {
         switch (direction) {

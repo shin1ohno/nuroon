@@ -13,5 +13,5 @@
   "engines": {
     "node": ">=16.10.0"
   },
-  "main": "nuroon.js"
+  "main": "bootstrap.js"
 }

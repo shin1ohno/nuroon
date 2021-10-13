@@ -40,6 +40,7 @@ class Nuroon {
     bootstrap(subscription) {
         this.subscribe(this.nuimo, subscription, subscription.callback);
         this.nuimo.scan();
+        require('pino')().info("Scanning for Nuimo Controllers.")
     }
 }
 

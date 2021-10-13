@@ -13,7 +13,6 @@ class RoonControl {
         this.plugin_props = plugin_props;
         this.core = undefined;
         this.current_zone = undefined;
-        this.zones = [];
         this.playingstate = "";
         this.status = undefined
         let roon = this.initialise_roon();
@@ -28,10 +27,35 @@ class RoonControl {
     next_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "next");
     previous_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "previous");
 
-    turn_volume = (value) => {
-        this.current_zone.outputs.forEach((o) => {
-            this.core.services.RoonApiTransport.change_volume(o, 'relative', value / 5.);
-        });
+    turn_volume = async (value) => {
+        let volume = {};
+
+        let refresh_volume = (o) => {
+            return new Promise(resolve => {
+                this.core.services.RoonApiTransport.get_outputs((msg, body) => {
+                    resolve(body.outputs.find(_o => _o.output_id === o.output_id).volume)
+                });
+            })
+        }
+
+        let change_volume = () => {
+            return new Promise(resolve => {
+                this.current_zone.outputs.filter(o => o.volume).forEach((o) => {
+                    this.core.services.RoonApiTransport.change_volume(o, 'relative', value, (_) => {
+                        resolve(o);
+                    });
+                })
+            })
+        };
+
+        let new_volume_set = async (o) => refresh_volume(o);
+        let volume_changed = async () => change_volume()
+
+        await volume_changed().then(new_volume_set).then(
+            new_vol => volume = new_vol
+        ).catch(err => logger.warn(err));
+
+        return Promise.resolve(volume);
     }
 
     change_current_zone_by_display_name = (name) => {
@@ -43,8 +67,7 @@ class RoonControl {
 
     zone_subscribed(response, msg) {
         if (response === "Subscribed") {
-            this.zones = msg.zones;
-            this.current_zone = this.zones.find((z) => z.zone_id === DEFAULT_ZONE);
+            this.current_zone = msg.zones.find((z) => z.zone_id === DEFAULT_ZONE);
             logger.debug(this.current_zone.state);
         } else if (response === "Changed" && msg['zones_changed']) {
             logger.debug(this.current_zone.state)
