@@ -10,14 +10,13 @@ const DEFAULT_ZONE = "160198e236817e736bbd314a165cb0b89e53"
 
 class RoonControl {
     constructor(plugin_props) {
-        this.plugin_props = plugin_props;
         this.core = undefined;
         this.current_zone = undefined;
         this.playingstate = "";
         this.status = undefined
-        let roon = this.initialise_roon();
-        this.status.set_status("Starting discovery", false);
-        roon.start_discovery();
+        this.subscribe_to_roon(plugin_props).catch(
+            e => logger.warn(e)
+        );
     }
 
     toggle_play = () => {
@@ -65,45 +64,46 @@ class RoonControl {
         });
     }
 
-    zone_subscribed(response, msg) {
-        if (response === "Subscribed") {
-            this.current_zone = msg.zones.find((z) => z.zone_id === DEFAULT_ZONE);
-            logger.debug(this.current_zone.state);
-        } else if (response === "Changed" && msg['zones_changed']) {
-            logger.debug(this.current_zone.state)
-        }
-        this.status.set_status(`Controlling ${this.current_zone.display_name}.`, false);
-    }
+    async subscribe_to_roon(plugin_props) {
+        let roon = undefined;
 
-    initialise_roon() {
-        let roon = new RoonApi(
-            Object.assign(this.plugin_props,
-                {
-                    core_paired: (core) => {
-                        this.core = core;
-                        this.status.set_status("Paired to core", false);
-                        this.core.services.RoonApiTransport.subscribe_zones((response, msg) => {
-                            try {
-                                this.zone_subscribed(response, msg)
-                            } catch (e) {
-                                logger.info(e);
+        let initialise_roon = () => {
+            return new Promise(resolve => {
+                roon = new RoonApi(
+                    Object.assign(plugin_props,
+                        {
+                            core_paired: (core) => {
+                                this.core = core;
+                                this.status.set_status("Paired to core", false);
+                                this.core.services.RoonApiTransport.subscribe_zones((response, msg) => {
+                                    if (response === "Subscribed") {
+                                        resolve(msg);
+                                    } else if (response === "Changed") {
+                                        logger.debug(this.current_zone.display_name + " | " + this.current_zone.state);
+                                        this.status.set_status(`Controlling ${this.current_zone.display_name}.`, false);
+                                    }
+                                });
+                            },
+                            core_unpaired: function (_) {
+                                this.core = undefined;
+                                this.current_zone = undefined;
+                                this.zones = [];
                             }
-                        });
-                    },
-                    core_unpaired: function (_) {
-                        this.core = undefined;
-                        this.current_zone = undefined;
-                        this.zones = [];
-                    }
-                }
-            )
-        )
-        this.status = new RoonApiStatus(roon);
-        roon.init_services({
-            required_services: [RoonApiTransport],
-            provided_services: [this.status],
-        });
-        return roon;
+                        }
+                    )
+                )
+                this.status = new RoonApiStatus(roon);
+                roon.init_services({
+                    required_services: [RoonApiTransport],
+                    provided_services: [this.status],
+                });
+                this.status.set_status("Starting discovery", false);
+                roon.start_discovery();
+            });
+        }
+        initialise_roon().then(
+            msg => this.current_zone = msg.zones.find((z) => z.zone_id === DEFAULT_ZONE)
+        );
     }
 }
 

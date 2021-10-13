@@ -239,7 +239,7 @@ nuroon.bootstrap({
         ).then(
             rel_vol => {
                 matrix(`volume_changed_${rel_vol}`, device);
-                logger.info(`volume: ${rel_vol}`);
+                logger.debug(`volume: ${rel_vol}`);
                 return rel_vol;
             }
         )
