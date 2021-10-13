@@ -1,0 +1,16 @@
+{
+  "name": "nuroon",
+  "version": "1.0.0",
+  "dependencies": {
+    "nuimojs": "shin1ohno/nuimojs#34cd295",
+    "pino": ">=6.13.3",
+    "node-roon-api": "github:roonlabs/node-roon-api",
+    "node-roon-api-settings": "github:roonlabs/node-roon-api-settings",
+    "node-roon-api-status": "github:roonlabs/node-roon-api-status",
+    "node-roon-api-transport": "github:roonlabs/node-roon-api-transport"
+  },
+  "engines": {
+    "node": ">=16.10.0"
+  },
+  "main": "nuroon.js"
+}
