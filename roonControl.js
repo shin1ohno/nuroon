@@ -21,7 +21,10 @@ class RoonControl {
         roon.start_discovery();
     }
 
-    toggle_play = () => this.core.services.RoonApiTransport.control(this.current_zone, "playpause");
+    toggle_play = () => {
+        this.core.services.RoonApiTransport.control(this.current_zone, "playpause");
+        return this.current_zone.playingstate;
+    }
     next_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "next");
     previous_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "previous");
 
@@ -34,21 +37,17 @@ class RoonControl {
     change_current_zone_by_display_name = (name) => {
         this.core.services.RoonApiTransport.get_zones((msg, body) => {
             this.current_zone = body.zones.find(z => z.display_name === name);
+            logger.info(`${this.current_zone.display_name} is the current zone now.`)
         });
-
-        logger.info(`${this.current_zone.display_name} is the current zone now.`)
     }
 
     zone_subscribed(response, msg) {
         if (response === "Subscribed") {
             this.zones = msg.zones;
             this.current_zone = this.zones.find((z) => z.zone_id === DEFAULT_ZONE);
-            if (this.current_zone) this.playingstate = this.current_zone.playingstate;
-            logger.debug(this.playingstate);
+            logger.debug(this.current_zone.state);
         } else if (response === "Changed" && msg['zones_changed']) {
-            let z = msg.zones_changed.find(z => z.zone_id = this.current_zone.zone_id)
-            if (z) this.playingstate = z.state;
-            logger.debug(this.playingstate);
+            logger.debug(this.current_zone.state)
         }
         this.status.set_status(`Controlling ${this.current_zone.display_name}.`, false);
     }
