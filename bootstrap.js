@@ -23,15 +23,14 @@ FileConfig.load_config_file()
             },
             press: (device) => {
                 logger.debug("Button pressed");
-                roon.toggle_play().then(
-                    () => roon.play_state()
-                ).then(
-                    status => {
-                        matrix(status, device);
-                        logger.debug(status);
-                        return status;
-                    }
-                )
+                roon.toggle_play().then(() => roon.play_state())
+                    .then(
+                        status => {
+                            matrix(status, device);
+                            logger.debug(status);
+                            return status;
+                        }
+                    )
             },
             swipe: (device, direction) => {
                 switch (direction) {

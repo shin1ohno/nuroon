@@ -19,7 +19,8 @@ class RoonControl {
     }
 
     refreshed_zone = (zone_id) => this.core.services.RoonApiTransport.zone_by_zone_id(zone_id);
-    play_state = () => this.refreshed_zone(this.current_zone.zone_id).state
+    //FIX: Why it's flipped...
+    play_state = () => ["playing", "paused"].find(s => s !== this.refreshed_zone(this.current_zone.zone_id).state);
 
     toggle_play = () => {
         return new Promise(resolve => {
