@@ -246,7 +246,7 @@ nuroon.bootstrap({
     rotate: async (device, amount) => {
         logger.debug(`Rotated by ${amount}`);
         roon.turn_volume(amount / 7.0).then(
-            volume => Math.round(10 * (volume.value - volume.min) / (volume.max - volume.min))
+            volume => Math.round(10 * (volume.value - volume.hard_limit_min) / (volume.hard_limit_max - volume.hard_limit_min))
         ).then(
             rel_vol => Math.min(rel_vol, 9)
         ).then(
