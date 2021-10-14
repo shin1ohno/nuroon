@@ -1,5 +1,4 @@
 const RoonApi = require("node-roon-api"),
-    RoonApiSettings = require('node-roon-api-settings'),
     RoonApiStatus = require('node-roon-api-status'),
     RoonApiTransport = require('node-roon-api-transport'),
     logger = require('pino')();
