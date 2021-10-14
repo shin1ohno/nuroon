@@ -67,19 +67,19 @@ nuroon.bootstrap({
                 logger.info("Touched bottom");
                 break;
             case (Nuimo.Area.LONGLEFT):
-                roon.change_current_zone_by_display_name('Qutest');
-                matrix("zone_switched", device);
+                roon.change_current_zone_by_display_name('Qutest')
+                    .then(() => matrix("zone_switched", device));
                 break;
             case (Nuimo.Area.LONGRIGHT):
-                roon.change_current_zone_by_display_name('Study');
-                matrix("zone_switched", device);
+                roon.change_current_zone_by_display_name('Study')
+                    .then(() => matrix("zone_switched", device));
                 break;
             case (Nuimo.Area.LONGTOP):
                 logger.info("Long touched top");
                 break;
             case (Nuimo.Area.LONGBOTTOM):
-                roon.change_current_zone_by_display_name('ZenGo');
-                matrix("zone_switched", device);
+                roon.change_current_zone_by_display_name('ZenGo')
+                    .then(() => matrix("zone_switched", device));
                 break;
         }
     },
