@@ -1,3 +1,5 @@
+const logger = require("pino")();
+
 class Nuroon {
     constructor(nuimo) {
         this.nuimo = nuimo;
@@ -5,6 +7,8 @@ class Nuroon {
 
     subscribe(nuimo, subscription, callback) {
         nuimo.on("discover", (device) => {
+            nuimo.stop();
+
             device.on("connect", () => {
                 subscription.connect(device);
             });
@@ -29,18 +33,24 @@ class Nuroon {
                 subscription.fly(device, direction, speed);
             });
 
-            device.on("detect", (distance) => {
+            device.on("distance", (distance) => {
                 subscription.detect(device, distance);
+            });
+
+            device.on("disconnect", () => {
+                logger.info("Disconnected. Scanning for Nuimo Controllers again.");
+                nuimo.scan();
             });
 
             callback(device);
         });
+
     }
 
     bootstrap(subscription) {
         this.subscribe(this.nuimo, subscription, subscription.callback);
         this.nuimo.scan();
-        require('pino')().info("Scanning for Nuimo Controllers.");
+        logger.info("Scanning for Nuimo Controllers.");
     }
 }
 
