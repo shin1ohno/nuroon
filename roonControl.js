@@ -20,7 +20,7 @@ class RoonControl {
     refreshed_zone = (zone_id) => this.core.services.RoonApiTransport.zone_by_zone_id(zone_id);
     play_state = () => this.refreshed_zone(this.current_zone.zone_id).state
 
-    toggle_play = async () => {
+    toggle_play = () => {
         return new Promise(resolve => {
             this.core.services.RoonApiTransport.control(this.current_zone, "playpause", resolve);
         })
@@ -79,10 +79,10 @@ class RoonControl {
                 }
             })
             .then(z => logger.info(`${z.display_name} is the current zone now.`))
-            .catch(e => logger.warn(e))
+            .catch(e => logger.warn(e));
     }
 
-    async subscribe_to_roon(plugin_props) {
+    subscribe_to_roon(plugin_props) {
         let roon = undefined;
 
         let initialise_roon = () => {
@@ -124,7 +124,7 @@ class RoonControl {
             });
         }
 
-        initialise_roon()
+        return initialise_roon()
             .then(msg => this.current_zone = msg.zones.find((z) => z.zone_id === DEFAULT_ZONE))
             .then(zone => {
                 logger.info(`Subscribed to ${this.core.display_name} (${this.core.display_version}).`);
