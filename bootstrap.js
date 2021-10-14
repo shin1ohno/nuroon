@@ -5,15 +5,15 @@ const RoonControl = require("./roonControl");
 const Fs = require("fs");
 const matrix = require("./matrix.js");
 
-let config = JSON.parse(Fs.readFileSync("./config.json"));
-let nuroon = new Nuroon(new Nuimo());
-let roon = new RoonControl(config.roon_plugin_props);
+const config = JSON.parse(Fs.readFileSync("./config.json"));
+const nuroon = new Nuroon(new Nuimo());
+const roon = new RoonControl(config.roon_plugin_props);
 
 nuroon.bootstrap({
     connect: (device) => {
         logger.info(`Nuroon connected to Nuimo(${device.uuid}).`)
         matrix("connected", device);
-        let l = device.batteryLevel
+        const l = device.batteryLevel
         if (l > 10) {
             logger.info(`Battery: ${l}%.`);
         } else {
@@ -83,7 +83,7 @@ nuroon.bootstrap({
                 break;
         }
     },
-    rotate: async (device, amount) => {
+    rotate: (device, amount) => {
         logger.debug(`Rotated by ${amount}`);
         roon.turn_volume(amount / 7.0).then(
             volume => Math.round(10 * (volume.value - volume.hard_limit_min) / (volume.hard_limit_max - volume.hard_limit_min))
