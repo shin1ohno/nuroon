@@ -8,91 +8,94 @@ const FileConfig = require("./file_config.js");
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 const nuroon = new Nuroon(new Nuimo());
+const roon = new RoonControl();
+
+const actions = {
+    connect: (device) => {
+        logger.info(`Nuroon connected to Nuimo(${device.uuid}).`)
+        matrix("connected", device);
+        const l = device.batteryLevel
+        if (l > 10) {
+            logger.info(`Battery: ${l}%.`);
+        } else {
+            logger.warn(`Battery level low: ${l}%.`);
+        }
+    },
+    toggle_play: (device) => {
+        roon.toggle_play()
+            .then(async () => await delay(100))
+            .then(() => roon.play_state())
+            .then(
+                status => {
+                    matrix(status, device);
+                    logger.debug(status);
+                    return status;
+                })
+    },
+    next_track: (device) => {
+        roon.next_track();
+        matrix("next_track", device);
+    },
+    previous_track: (device) => {
+        roon.previous_track();
+        matrix("previous_track", device);
+    },
+    switch_zone: (device, zone_name) => {
+        roon.change_current_zone_by_display_name(zone_name)
+            .then(() => matrix("zone_switched", device))
+    },
+    noop: (device) => {
+    }
+}
 
 FileConfig.load_config_file()
-    .then(conf => new RoonControl(conf.roon_plugin_props))
-    .then(roon => {
-        forever(
-            async () => {
-                await delay(200);
-                try {
-                    logger.debug(roon.play_state());
-                } catch (e) {
-                    logger.debug(e);
-                }
-            }
-        )
+    .then(conf => roon.subscribe_to_roon(conf))
+    .then(() => {
+        let x = roon.roon_settings.x;
         nuroon.bootstrap({
-            connect: (device) => {
-                logger.info(`Nuroon connected to Nuimo(${device.uuid}).`)
-                matrix("connected", device);
-                const l = device.batteryLevel
-                if (l > 10) {
-                    logger.info(`Battery: ${l}%.`);
-                } else {
-                    logger.warn(`Battery level low: ${l}%.`);
-                }
-            },
-            press: (device) => {
-                roon.toggle_play()
-                    .then(async () => await delay(100))
-                    .then(() => roon.play_state())
-                    .then(
-                        status => {
-                            matrix(status, device);
-                            logger.debug(status);
-                            return status;
-                        }
-                    )
-            },
+            connect: (device) => actions.connect(device),
+            press: (device) => actions[roon.roon_settings.x.press](device),
             swipe: (device, direction) => {
                 switch (direction) {
                     case (Nuimo.Swipe.LEFT):
-                        roon.previous_track();
-                        matrix("previous_track", device);
+                        actions[roon.roon_settings.x.swipe_left](device);
                         break;
                     case (Nuimo.Swipe.RIGHT):
-                        roon.next_track();
-                        matrix("next_track", device);
+                        actions[roon.roon_settings.x.swipe_right](device);
                         break;
                     case (Nuimo.Swipe.UP):
-                        logger.info("Swiped up");
+                        actions[roon.roon_settings.x.swipe_up](device);
                         break;
                     case (Nuimo.Swipe.DOWN):
-                        logger.info("Swiped down");
+                        actions[roon.roon_settings.x.swipe_down](device);
                         break;
                 }
             },
             touch: (device, area) => {
                 switch (area) {
                     case (Nuimo.Area.LEFT):
-                        roon.previous_track();
-                        matrix("previous_track", device);
+                        actions[roon.roon_settings.x.touch_left](device);
                         break;
                     case (Nuimo.Area.RIGHT):
-                        roon.next_track();
-                        matrix("next_track", device);
+                        actions[roon.roon_settings.x.touch_right](device);
                         break;
                     case (Nuimo.Area.TOP):
-                        logger.info("Touched top");
+                        actions[roon.roon_settings.x.touch_top](device);
                         break;
                     case (Nuimo.Area.BOTTOM):
-                        logger.info("Touched bottom");
+                        actions[roon.roon_settings.x.touch_bottom](device);
                         break;
                     case (Nuimo.Area.LONGLEFT):
-                        roon.change_current_zone_by_display_name('Qutest')
-                            .then(() => matrix("zone_switched", device));
+                        actions.switch_zone(device, roon.roon_settings.x.long_left.name);
                         break;
                     case (Nuimo.Area.LONGRIGHT):
-                        roon.change_current_zone_by_display_name('Study')
-                            .then(() => matrix("zone_switched", device));
+                        actions.switch_zone(device, roon.roon_settings.x.long_right.name);
                         break;
                     case (Nuimo.Area.LONGTOP):
-                        logger.info("Long touched top");
+                        actions.switch_zone(device, roon.roon_settings.x.long_top.name);
                         break;
                     case (Nuimo.Area.LONGBOTTOM):
-                        roon.change_current_zone_by_display_name('ZenGo')
-                            .then(() => matrix("zone_switched", device));
+                        actions.switch_zone(device, roon.roon_settings.x.long_bottom.name);
                         break;
                 }
             },
@@ -113,9 +116,11 @@ FileConfig.load_config_file()
             fly: (device, direction, speed) => {
                 switch (direction) {
                     case (Nuimo.Fly.LEFT):
+                        actions[roon.roon_settings.x.fly_left](device)
                         logger.info(`Flew left by speed ${speed}`);
                         break;
                     case (Nuimo.Fly.RIGHT):
+                        actions[roon.roon_settings.x.fly_right](device)
                         logger.info(`Flew right by speed ${speed}`);
                         break;
                 }

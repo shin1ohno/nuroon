@@ -1,12 +1,33 @@
 const RoonApiSettings = require("node-roon-api-settings");
 const FileConfig = require("./file_config.js");
 const logger = require("pino")();
-const PROPS_KEY = "roon_plugin_props"
+const PROPS_KEY = "x";
 
 const default_settings = {
-    default_zone: undefined,
-    zones: undefined
+    default_zone: {},
+    long_left: {},
+    long_right: {},
+    long_top: {},
+    long_bottom: {},
+    press: "toggle_play",
+    swipe_left: "previous_track",
+    swipe_right: "next_track",
+    swipe_up: "noop",
+    swipe_down: "noop",
+    touch_left: "previous_track",
+    touch_right: "next_track",
+    touch_top: "noop",
+    touch_bottom: "noop",
+    fly_left: "noop",
+    fly_right: "noop"
 }
+
+const action_values = [
+    {title: "Toggle Play/Pause", value: "toggle_play"},
+    {title: "Previous Track", value: "previous_track"},
+    {title: "Next Track", value: "next_track"},
+    {title: "No action", value: "noop"}
+]
 
 const layout = (settings) => {
     let l = {
@@ -20,7 +41,93 @@ const layout = (settings) => {
             type: "zone",
             title: "Default Zone",
             setting: "default_zone",
-        }
+        },
+        {
+            type: "zone",
+            title: "Zone select with long left tap",
+            setting: "long_left",
+        },
+        {
+            type: "zone",
+            title: "Zone select with long right tap",
+            setting: "long_right",
+        },
+        {
+            type: "zone",
+            title: "Zone select with long top tap (not recommended)",
+            setting: "long_top",
+        },
+        {
+            type: "zone",
+            title: "Zone select with long bottom tap",
+            setting: "long_bottom",
+        },
+        {
+            type: "dropdown",
+            title: "Press Action",
+            setting: "press",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Swipe Left Action",
+            setting: "swipe_left",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Swipe Right Action",
+            setting: "swipe_right",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Swipe Up Action",
+            setting: "swipe_up",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Swipe Down Action",
+            setting: "swipe_down",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Touch Left Action",
+            setting: "touch_left",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Touch Right Action",
+            setting: "touch_right",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Touch Top Action",
+            setting: "touch_top",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Touch Bottom Action",
+            setting: "touch_bottom",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Fly Left Action",
+            setting: "fly_left",
+            values: action_values
+        },
+        {
+            type: "dropdown",
+            title: "Fly Right Action",
+            setting: "fly_right",
+            values: action_values
+        },
     )
     return l;
 }

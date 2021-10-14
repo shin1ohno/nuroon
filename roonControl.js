@@ -9,13 +9,11 @@ const DEFAULT_ZONE = "160198e236817e736bbd314a165cb0b89e53"
 // Study: "160198e236817e736bbd314a165cb0b89e53"
 
 class RoonControl {
-    constructor(plugin_props) {
+    constructor() {
         this.core = undefined;
         this.current_zone = undefined;
         this.status = undefined
         this.roon_settings = undefined;
-        this.subscribe_to_roon(plugin_props)
-            .catch(e => logger.warn(e));
     }
 
     refreshed_zone = (zone_id) => this.core.services.RoonApiTransport.zone_by_zone_id(zone_id);
@@ -83,11 +81,11 @@ class RoonControl {
             .catch(e => logger.warn(e));
     }
 
-    subscribe_to_roon(plugin_props) {
+    subscribe_to_roon = (conf) => {
         let initialise_roon = () => {
             return new Promise(resolve => {
                 let roon = new RoonApi(
-                    Object.assign(plugin_props,
+                    Object.assign(conf.roon_plugin_props,
                         {
                             core_paired: (core) => {
                                 this.core = core;
@@ -114,7 +112,7 @@ class RoonControl {
                     )
                 )
 
-                this.roon_settings = new RoonSetting(roon, plugin_props);
+                this.roon_settings = new RoonSetting(roon, conf.x);
                 this.status = new RoonApiStatus(roon);
                 roon.init_services({
                     required_services: [RoonApiTransport],
