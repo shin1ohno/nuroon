@@ -2,7 +2,7 @@ const logger = require("pino")();
 const Nuimo = require("nuimojs");
 const Nuroon = require("./nuroon");
 const RoonControl = require("./roonControl");
-const Fs = require("fs")
+const Fs = require("fs");
 
 let config = JSON.parse(Fs.readFileSync("./config.json"));
 let nuroon = new Nuroon(new Nuimo());
@@ -171,10 +171,14 @@ const matrix = (feed_back_pattern, device) => {
 
 nuroon.bootstrap({
     connect: (device) => {
-        logger.info("Nuroon started.")
-        logger.debug(`Nuimo(${device.uuid}) connected.`);
+        logger.info(`Nuroon connected to Nuimo(${device.uuid}).`)
         matrix("connected", device);
-        logger.info(`Battery: ${device.batteryLevel}%.`)
+        let l = device.batteryLevel
+        if (l > 10) {
+            logger.info(`Battery: ${l}%.`);
+        } else {
+            logger.warn(`Battery level low: ${l}%.`);
+        }
     },
     press: (device) => {
         logger.debug("Button pressed");
@@ -209,10 +213,12 @@ nuroon.bootstrap({
     touch: (device, area) => {
         switch (area) {
             case (Nuimo.Area.LEFT):
-                logger.info("Touched left");
+                roon.previous_track();
+                matrix("previous_track", device);
                 break;
             case (Nuimo.Area.RIGHT):
-                logger.info("Touched right");
+                roon.next_track();
+                matrix("next_track", device);
                 break;
             case (Nuimo.Area.TOP):
                 logger.info("Touched top");

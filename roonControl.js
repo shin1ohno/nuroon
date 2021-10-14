@@ -107,6 +107,11 @@ class RoonControl {
         }
         initialise_roon().then(
             msg => this.current_zone = msg.zones.find((z) => z.zone_id === DEFAULT_ZONE)
+        ).then(
+            zone => {
+                logger.info(`Subscribed to ${this.core.display_name} (${this.core.display_version}).`);
+                logger.info(`Controlling ${zone.display_name} ${zone.state} ${zone.now_playing.one_line.line1}`);
+            }
         );
     }
 }
