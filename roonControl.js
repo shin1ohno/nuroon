@@ -13,9 +13,8 @@ class RoonControl {
         this.core = undefined;
         this.current_zone = undefined;
         this.status = undefined
-        this.subscribe_to_roon(plugin_props).catch(
-            e => logger.warn(e)
-        );
+        this.subscribe_to_roon(plugin_props)
+            .catch(e => logger.warn(e));
     }
 
     refreshed_zone = (zone_id) => this.core.services.RoonApiTransport.zone_by_zone_id(zone_id);
@@ -30,7 +29,7 @@ class RoonControl {
     next_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "next");
     previous_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "previous");
 
-    turn_volume = async (value) => {
+    turn_volume = (value) => {
         let volume = {};
 
         let refresh_volume = (o) => {
@@ -54,11 +53,10 @@ class RoonControl {
         let new_volume_set = async (o) => refresh_volume(o);
         let volume_changed = async () => change_volume()
 
-        await volume_changed().then(new_volume_set).then(
-            new_vol => volume = new_vol
-        ).catch(err => logger.warn(err));
-
-        return Promise.resolve(volume);
+        return volume_changed()
+            .then(new_volume_set)
+            .then(new_vol => volume = new_vol)
+            .catch(e => logger.warn(e));
     }
 
     fetch_all_zones = () => {
@@ -70,8 +68,8 @@ class RoonControl {
     change_current_zone_by_display_name = (name) => {
         const old_name = this.current_zone.display_name;
 
-        return this.fetch_all_zones().then(
-            zones => {
+        return this.fetch_all_zones()
+            .then(zones => {
                 const new_zone = zones.find(z => z.display_name === name);
                 if (new_zone) {
                     return this.current_zone = new_zone;
@@ -79,12 +77,9 @@ class RoonControl {
                     logger.warn(`No zone is available by name: ${name}.`);
                     return this.current_zone = zones.find(z => z.display_name === old_name);
                 }
-            }
-        ).then(
-            z => logger.info(`${z.display_name} is the current zone now.`)
-        ).catch(
-            e => logger.warn(e)
-        )
+            })
+            .then(z => logger.info(`${z.display_name} is the current zone now.`))
+            .catch(e => logger.warn(e))
     }
 
     async subscribe_to_roon(plugin_props) {
@@ -128,14 +123,13 @@ class RoonControl {
                 roon.start_discovery();
             });
         }
-        initialise_roon().then(
-            msg => this.current_zone = msg.zones.find((z) => z.zone_id === DEFAULT_ZONE)
-        ).then(
-            zone => {
+
+        initialise_roon()
+            .then(msg => this.current_zone = msg.zones.find((z) => z.zone_id === DEFAULT_ZONE))
+            .then(zone => {
                 logger.info(`Subscribed to ${this.core.display_name} (${this.core.display_version}).`);
                 logger.info(`Controlling ${zone.display_name} ${zone.state} ${zone.now_playing.one_line.line1}`);
-            }
-        );
+            });
     }
 }
 
