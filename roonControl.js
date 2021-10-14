@@ -12,17 +12,21 @@ class RoonControl {
     constructor(plugin_props) {
         this.core = undefined;
         this.current_zone = undefined;
-        this.playingstate = "";
         this.status = undefined
         this.subscribe_to_roon(plugin_props).catch(
             e => logger.warn(e)
         );
     }
 
-    toggle_play = () => {
-        this.core.services.RoonApiTransport.control(this.current_zone, "playpause");
-        return this.current_zone.playingstate;
+    refreshed_zone = (zone_id) => this.core.services.RoonApiTransport.zone_by_zone_id(zone_id);
+    play_state = () => this.refreshed_zone(this.current_zone.zone_id).state
+
+    toggle_play = async () => {
+        return new Promise(resolve => {
+            this.core.services.RoonApiTransport.control(this.current_zone, "playpause", resolve);
+        })
     }
+
     next_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "next");
     previous_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "previous");
 
