@@ -19,7 +19,7 @@ const FileConfig = {
                 if (err) {
                     file_config = DEFAULT_PROPS;
                 } else {
-                    file_config = JSON.parse(Fs.readFileSync("./config.json"));
+                    file_config = Object.assign(DEFAULT_PROPS, JSON.parse(Fs.readFileSync("./config.json")));
                 }
                 resolve(file_config);
             });

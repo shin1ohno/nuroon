@@ -2,6 +2,7 @@ const RoonApi = require("node-roon-api"),
     RoonApiStatus = require('node-roon-api-status'),
     RoonApiTransport = require('node-roon-api-transport'),
     logger = require('pino')();
+const RoonSetting = require("./roon_setting.js");
 
 const DEFAULT_ZONE = "160198e236817e736bbd314a165cb0b89e53"
 // Qutest: "160103b6b4a1dd24c3513106b882312e4c58"
@@ -12,6 +13,7 @@ class RoonControl {
         this.core = undefined;
         this.current_zone = undefined;
         this.status = undefined
+        this.roon_settings = undefined;
         this.subscribe_to_roon(plugin_props)
             .catch(e => logger.warn(e));
     }
@@ -82,11 +84,9 @@ class RoonControl {
     }
 
     subscribe_to_roon(plugin_props) {
-        let roon = undefined;
-
         let initialise_roon = () => {
             return new Promise(resolve => {
-                roon = new RoonApi(
+                let roon = new RoonApi(
                     Object.assign(plugin_props,
                         {
                             core_paired: (core) => {
@@ -113,10 +113,12 @@ class RoonControl {
                         }
                     )
                 )
+
+                this.roon_settings = new RoonSetting(roon, plugin_props);
                 this.status = new RoonApiStatus(roon);
                 roon.init_services({
                     required_services: [RoonApiTransport],
-                    provided_services: [this.status],
+                    provided_services: [this.status, this.roon_settings.provider],
                 });
                 this.status.set_status("Starting discovery", false);
                 roon.start_discovery();
@@ -124,7 +126,7 @@ class RoonControl {
         }
 
         return initialise_roon()
-            .then(msg => this.current_zone = msg.zones.find((z) => z.zone_id === DEFAULT_ZONE))
+            .then(msg => this.current_zone = msg.zones.find((z) => z.display_name === this.roon_settings.x.default_zone.name))
             .then(zone => {
                 logger.info(`Subscribed to ${this.core.display_name} (${this.core.display_version}).`);
                 logger.info(`Controlling ${zone.display_name} ${zone.state} ${zone.now_playing.one_line.line1}`);
