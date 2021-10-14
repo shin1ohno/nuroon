@@ -1,5 +1,18 @@
 const matrix = (feed_back_pattern, device) => {
     switch (feed_back_pattern) {
+        case "heart_beat":
+            device.setLEDMatrix([
+                1, 0, 0, 0, 0, 0, 0, 0, 1,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 1, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 1, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                1, 0, 0, 0, 0, 0, 0, 0, 1
+            ], 1, 200, 16);
+            break;
         case "connected":
             device.setLEDMatrix([
                 0, 1, 1, 1, 1, 1, 1, 1, 0,

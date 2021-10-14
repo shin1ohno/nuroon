@@ -1,15 +1,27 @@
 const logger = require("pino")();
 const Nuimo = require("nuimojs");
+const forever = require("async/forever");
 const Nuroon = require("./nuroon");
 const RoonControl = require("./roonControl");
 const matrix = require("./matrix.js");
-const FileConfig = require("./file_config.js")
+const FileConfig = require("./file_config.js");
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
 const nuroon = new Nuroon(new Nuimo());
 
 FileConfig.load_config_file()
     .then(conf => new RoonControl(conf.roon_plugin_props))
     .then(roon => {
+        forever(
+            async () => {
+                await delay(200);
+                try {
+                    logger.debug(roon.play_state());
+                } catch (e) {
+                    logger.debug(e);
+                }
+            }
+        )
         nuroon.bootstrap({
             connect: (device) => {
                 logger.info(`Nuroon connected to Nuimo(${device.uuid}).`)
@@ -23,6 +35,7 @@ FileConfig.load_config_file()
             },
             press: (device) => {
                 roon.toggle_play()
+                    .then(async () => await delay(100))
                     .then(() => roon.play_state())
                     .then(
                         status => {
@@ -109,6 +122,12 @@ FileConfig.load_config_file()
             },
             detect: (device, distance) => {
                 logger.info(`Detected hand at distance ${distance}`);
+            },
+            heartbeat: (device) => {
+                if (roon.play_state() === "playing") {
+                    logger.debug(`Pinging Nuimo.`);
+                    matrix("heart_beat", device);
+                }
             },
             callback: (device) => {
                 device.connect();
