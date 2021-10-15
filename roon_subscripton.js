@@ -29,7 +29,9 @@ class RoonSubscription {
                                             logger.debug(this.current_zone.display_name + " | " + this.current_zone.state);
                                             this.status.set_status(`Controlling ${this.current_zone.display_name}.`, false);
                                         } else {
-                                            logger.warn("No zone available")
+                                            logger.warn("Default zone is not available. Falling back to the first available zone.");
+                                            this.current_zone = this.core.services.RoonApiTransport.get_zones[0];
+                                            resolve(msg);
                                         }
                                     }
                                 });
@@ -60,7 +62,7 @@ class RoonSubscription {
                 logger.info(`Subscribed to ${this.core.display_name} (${this.core.display_version}).`);
                 logger.info(`Controlling ${zone.display_name} ${zone.state} ${zone.now_playing.one_line.line1}`);
                 return this;
-            });
+            }).catch(e => logger.warn(e));
     }
 }
 

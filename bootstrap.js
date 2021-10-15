@@ -110,4 +110,4 @@ FileConfig.load_config_file()
                 device.connect();
             }
         })
-    });
+    }).catch(e => logger.warn(e));
