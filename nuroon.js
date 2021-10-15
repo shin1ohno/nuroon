@@ -1,6 +1,4 @@
 const logger = require("pino")();
-const forever = require("async/forever");
-const delay = ms => new Promise(res => setTimeout(res, ms));
 
 class Nuroon {
     constructor(nuimo) {
@@ -13,15 +11,7 @@ class Nuroon {
 
             device.on("connect", () => {
                 subscription.connect(device);
-                forever(
-                    async () => {
-                        await delay(5_000);
-                        subscription.heartbeat(device);
-                    },
-                    (err) => {
-                        logger.warn(err)
-                    }
-                )
+                subscription.heartbeat(device);
             });
 
             device.on("press", () => {

@@ -19,7 +19,9 @@ const default_settings = {
     touch_top: "noop",
     touch_bottom: "noop",
     fly_left: "noop",
-    fly_right: "noop"
+    fly_right: "noop",
+    rotary_damping_factor: 10,
+    heartbeat_delay: 5
 }
 
 const action_values = [
@@ -37,6 +39,10 @@ const layout = (settings) => {
     };
 
     l.layout.push(
+        {
+            type: "label",
+            title: "Zone settings"
+        },
         {
             type: "zone",
             title: "Default Zone",
@@ -61,6 +67,10 @@ const layout = (settings) => {
             type: "zone",
             title: "Zone select with long bottom tap",
             setting: "long_bottom",
+        },
+        {
+            type: "title",
+            title: "Playback settings"
         },
         {
             type: "dropdown",
@@ -128,6 +138,23 @@ const layout = (settings) => {
             setting: "fly_right",
             values: action_values
         },
+        {
+            type: "group",
+            title: "Adcanced settings",
+            collapsable: true,
+            items: [
+                {
+                    type: "integer",
+                    title: "Rotary damping factor",
+                    setting: "rotary_damping_factor",
+                },
+                {
+                    type: "integer",
+                    title: "Heartbeat delay in seconds",
+                    setting: "heartbeat_delay",
+                }
+            ]
+        }
     )
     return l;
 }

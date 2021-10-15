@@ -99,7 +99,7 @@ FileConfig.load_config_file()
             },
             rotate: (device, amount) => {
                 logger.debug(`Rotated by ${amount}`);
-                roon.turn_volume(amount / 7.0)
+                roon.turn_volume(amount / parseFloat(roon.roon_settings.x.rotary_damping_factor).toFixed(1))
                     .then(volume => Math.round(10 * (volume.value - volume.hard_limit_min) / (volume.hard_limit_max - volume.hard_limit_min)))
                     .then(rel_vol => Math.min(rel_vol, 9))
                     .then(
@@ -125,10 +125,19 @@ FileConfig.load_config_file()
                 logger.info(`Detected hand at distance ${distance}`);
             },
             heartbeat: (device) => {
-                if (roon.play_state() === "playing") {
-                    logger.debug(`Pinging Nuimo.`);
-                    matrix("heart_beat", device);
-                }
+                forever(
+                    async () => {
+                        await delay(roon.roon_settings.x.heartbeat_delay * 1_000);
+                        if (roon.play_state() === "playing") {
+                            logger.debug(`Pinging Nuimo.`);
+                            matrix("heart_beat", device);
+                        }
+                    },
+                    (err) => {
+                        logger.warn(err)
+                    }
+                )
+
             },
             callback: (device) => {
                 device.connect();
