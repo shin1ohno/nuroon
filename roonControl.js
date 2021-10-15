@@ -16,7 +16,7 @@ class RoonControl {
         this.roon_settings = undefined;
     }
 
-    refreshed_zone = (zone_id) => this.core.services.RoonApiTransport.zone_by_zone_id(zone_id);
+    refreshed_zone = (zone_id) => this.core.services.RoonApiTransport.zone_by_zone_id(zone_id) || {};
     play_state = () => this.refreshed_zone(this.current_zone.zone_id).state;
 
     toggle_play = () => {
