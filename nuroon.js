@@ -15,28 +15,28 @@ class Nuroon {
             });
 
             device.on("press", () => {
-                subscription.press(device);
+                subscription.press();
             });
 
             device.on("swipe", (direction) => {
-                subscription.swipe(device, direction);
+                subscription.swipe(direction);
             });
 
             device.on("touch", (direction) => {
-                subscription.touch(device, direction);
+                subscription.touch(direction);
             });
 
             device.on("rotate", (amount) => {
-                subscription.rotate(device, amount);
+                subscription.rotate(amount);
             });
 
             device.on("fly", (direction, speed) => {
                 //The speed parameter is always zero so just ignore
-                subscription.fly(device, direction);
+                subscription.fly(direction);
             });
 
             device.on("distance", (distance) => {
-                subscription.detect(device, distance);
+                subscription.detect(distance);
             });
 
             device.on("disconnect", () => {

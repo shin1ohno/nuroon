@@ -5,99 +5,68 @@ const Nuroon = require("./nuroon");
 const RoonControl = require("./roonControl");
 const matrix = require("./matrix.js");
 const FileConfig = require("./file_config.js");
+const RoonSubscription = require("./roon_subscripton");
+const Actions = require("./actions");
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-const nuroon = new Nuroon(new Nuimo());
-const roon = new RoonControl();
-
-const actions = {
-    connect: (device) => {
-        logger.info(`Nuroon connected to Nuimo(${device.uuid}).`)
-        matrix("connected", device);
-        const l = device.batteryLevel
-        if (l > 10) {
-            logger.info(`Battery: ${l}%.`);
-        } else {
-            logger.warn(`Battery level low: ${l}%.`);
-        }
-    },
-    toggle_play: (device) => {
-        roon.toggle_play()
-            .then(async () => await delay(50))
-            .then(() => roon.play_state())
-            .then(
-                status => {
-                    matrix(status, device);
-                    logger.debug(status);
-                    return status;
-                })
-    },
-    next_track: (device) => {
-        roon.next_track();
-        matrix("next_track", device);
-    },
-    previous_track: (device) => {
-        roon.previous_track();
-        matrix("previous_track", device);
-    },
-    switch_zone: (device, zone_name) => {
-        roon.change_current_zone_by_display_name(zone_name)
-            .then(() => matrix("zone_switched", device))
-    },
-    noop: (device) => device
-}
-
 FileConfig.load_config_file()
-    .then(conf => roon.subscribe_to_roon(conf))
-    .then(() => {
-        nuroon.bootstrap({
-            connect: (device) => actions.connect(device),
-            press: (device) => actions[roon.roon_settings.x.press](device),
-            swipe: (device, direction) => {
+    .then(conf => (new RoonSubscription()).subscribe_to_roon(conf))
+    .then(subscription => new RoonControl(subscription.core, subscription.current_zone, subscription.roon_settings))
+    .then((roon) => {
+        let device = undefined;
+        let actions = undefined;
+        (new Nuroon(new Nuimo())).bootstrap({
+            connect: (d) => {
+                device = d;
+                actions = new Actions(roon, d);
+                actions.connect();
+            },
+            press: () => actions[roon.roon_settings.x.press](),
+            swipe: (direction) => {
                 switch (direction) {
                     case (Nuimo.Swipe.LEFT):
-                        actions[roon.roon_settings.x.swipe_left](device);
+                        actions[roon.roon_settings.x.swipe_left]();
                         break;
                     case (Nuimo.Swipe.RIGHT):
-                        actions[roon.roon_settings.x.swipe_right](device);
+                        actions[roon.roon_settings.x.swipe_right]();
                         break;
                     case (Nuimo.Swipe.UP):
-                        actions[roon.roon_settings.x.swipe_up](device);
+                        actions[roon.roon_settings.x.swipe_up]();
                         break;
                     case (Nuimo.Swipe.DOWN):
-                        actions[roon.roon_settings.x.swipe_down](device);
+                        actions[roon.roon_settings.x.swipe_down]();
                         break;
                 }
             },
-            touch: (device, area) => {
+            touch: (area) => {
                 switch (area) {
                     case (Nuimo.Area.LEFT):
-                        actions[roon.roon_settings.x.touch_left](device);
+                        actions[roon.roon_settings.x.touch_left]();
                         break;
                     case (Nuimo.Area.RIGHT):
-                        actions[roon.roon_settings.x.touch_right](device);
+                        actions[roon.roon_settings.x.touch_right]();
                         break;
                     case (Nuimo.Area.TOP):
-                        actions[roon.roon_settings.x.touch_top](device);
+                        actions[roon.roon_settings.x.touch_top]();
                         break;
                     case (Nuimo.Area.BOTTOM):
-                        actions[roon.roon_settings.x.touch_bottom](device);
+                        actions[roon.roon_settings.x.touch_bottom]();
                         break;
                     case (Nuimo.Area.LONGLEFT):
-                        actions.switch_zone(device, roon.roon_settings.x.long_left.name);
+                        actions.switch_zone(roon.roon_settings.x.long_left.name);
                         break;
                     case (Nuimo.Area.LONGRIGHT):
-                        actions.switch_zone(device, roon.roon_settings.x.long_right.name);
+                        actions.switch_zone(roon.roon_settings.x.long_right.name);
                         break;
                     case (Nuimo.Area.LONGTOP):
-                        actions.switch_zone(device, roon.roon_settings.x.long_top.name);
+                        actions.switch_zone(roon.roon_settings.x.long_top.name);
                         break;
                     case (Nuimo.Area.LONGBOTTOM):
-                        actions.switch_zone(device, roon.roon_settings.x.long_bottom.name);
+                        actions.switch_zone(roon.roon_settings.x.long_bottom.name);
                         break;
                 }
             },
-            rotate: (device, amount) => {
+            rotate: (amount) => {
                 logger.debug(`Rotated by ${amount}`);
                 roon.turn_volume(amount / parseFloat(roon.roon_settings.x.rotary_damping_factor).toFixed(1))
                     .then(volume => Math.round(10 * (volume.value - volume.hard_limit_min) / (volume.hard_limit_max - volume.hard_limit_min)))
@@ -109,7 +78,7 @@ FileConfig.load_config_file()
                             return rel_vol;
                         });
             },
-            fly: (device, direction) => {
+            fly: (direction) => {
                 switch (direction) {
                     case (Nuimo.Fly.LEFT):
                         actions[roon.roon_settings.x.fly_left](device)
@@ -119,10 +88,10 @@ FileConfig.load_config_file()
                         break;
                 }
             },
-            detect: (device, distance) => {
+            detect: (distance) => {
                 logger.info(`Detected hand at distance ${distance}`);
             },
-            heartbeat: (device) => {
+            heartbeat: () => {
                 forever(
                     async () => {
                         await delay(roon.roon_settings.x.heartbeat_delay * 1_000);
@@ -142,4 +111,3 @@ FileConfig.load_config_file()
             }
         })
     });
-
