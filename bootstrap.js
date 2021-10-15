@@ -44,14 +44,12 @@ const actions = {
         roon.change_current_zone_by_display_name(zone_name)
             .then(() => matrix("zone_switched", device))
     },
-    noop: (device) => {
-    }
+    noop: (device) => device
 }
 
 FileConfig.load_config_file()
     .then(conf => roon.subscribe_to_roon(conf))
     .then(() => {
-        let x = roon.roon_settings.x;
         nuroon.bootstrap({
             connect: (device) => actions.connect(device),
             press: (device) => actions[roon.roon_settings.x.press](device),
@@ -101,17 +99,15 @@ FileConfig.load_config_file()
             },
             rotate: (device, amount) => {
                 logger.debug(`Rotated by ${amount}`);
-                roon.turn_volume(amount / 7.0).then(
-                    volume => Math.round(10 * (volume.value - volume.hard_limit_min) / (volume.hard_limit_max - volume.hard_limit_min))
-                ).then(
-                    rel_vol => Math.min(rel_vol, 9)
-                ).then(
-                    rel_vol => {
-                        matrix(`volume_changed_${rel_vol}`, device);
-                        logger.debug(`volume: ${rel_vol}`);
-                        return rel_vol;
-                    }
-                )
+                roon.turn_volume(amount / 7.0)
+                    .then(volume => Math.round(10 * (volume.value - volume.hard_limit_min) / (volume.hard_limit_max - volume.hard_limit_min)))
+                    .then(rel_vol => Math.min(rel_vol, 9))
+                    .then(
+                        rel_vol => {
+                            matrix(`volume_changed_${rel_vol}`, device);
+                            logger.debug(`volume: ${rel_vol}`);
+                            return rel_vol;
+                        });
             },
             fly: (device, direction, speed) => {
                 switch (direction) {

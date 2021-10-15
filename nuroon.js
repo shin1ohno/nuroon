@@ -41,7 +41,8 @@ class Nuroon {
             });
 
             device.on("fly", (direction, speed) => {
-                subscription.fly(device, direction, speed);
+                //The speed parameter is always zero so just ignore
+                subscription.fly(device, direction);
             });
 
             device.on("distance", (distance) => {
