@@ -50,22 +50,22 @@ const layout = (settings) => {
         },
         {
             type: "zone",
-            title: "Zone select with long left tap",
+            title: "Zone transfer with long left tap",
             setting: "long_left",
         },
         {
             type: "zone",
-            title: "Zone select with long right tap",
+            title: "Zone transfer with long right tap",
             setting: "long_right",
         },
         {
             type: "zone",
-            title: "Zone select with long top tap (not recommended)",
+            title: "Zone transfer with long top tap (not recommended)",
             setting: "long_top",
         },
         {
             type: "zone",
-            title: "Zone select with long bottom tap",
+            title: "Zone transfer with long bottom tap",
             setting: "long_bottom",
         },
         {

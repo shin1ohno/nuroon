@@ -53,16 +53,16 @@ FileConfig.load_config_file()
                         actions[roon.roon_settings.x.touch_bottom]();
                         break;
                     case (Nuimo.Area.LONGLEFT):
-                        actions.switch_zone(roon.roon_settings.x.long_left.name);
+                        actions.transfer_zone(roon.roon_settings.x.long_left);
                         break;
                     case (Nuimo.Area.LONGRIGHT):
-                        actions.switch_zone(roon.roon_settings.x.long_right.name);
+                        actions.transfer_zone(roon.roon_settings.x.long_right);
                         break;
                     case (Nuimo.Area.LONGTOP):
-                        actions.switch_zone(roon.roon_settings.x.long_top.name);
+                        actions.transfer_zone(roon.roon_settings.x.long_top);
                         break;
                     case (Nuimo.Area.LONGBOTTOM):
-                        actions.switch_zone(roon.roon_settings.x.long_bottom.name);
+                        actions.transfer_zone(roon.roon_settings.x.long_bottom);
                         break;
                 }
             },

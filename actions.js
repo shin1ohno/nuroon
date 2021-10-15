@@ -41,8 +41,13 @@ class Actions {
         matrix("previous_track", this.device);
     }
 
-    switch_zone = (zone_name) => {
-        this.roon.change_current_zone_by_display_name(zone_name)
+    transfer_zone = (zone) => {
+        this.roon.transfer_zone(zone)
+            .then(() => matrix("zone_switched", this.device));
+    }
+
+    switch_zone = (zone) => {
+        this.roon.change_current_zone(zone)
             .then(() => matrix("zone_switched", this.device));
     }
 

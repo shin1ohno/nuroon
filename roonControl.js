@@ -7,24 +7,26 @@ class RoonControl {
         this.current_zone = initial_zone;
     }
 
-    refreshed_zone = (zone_id) => this.core.services.RoonApiTransport.zone_by_zone_id(zone_id) || {};
+    transport = () => this.core.services.RoonApiTransport
+
+    refreshed_zone = (zone_id) => this.transport().zone_by_zone_id(zone_id) || {};
     play_state = () => this.refreshed_zone(this.current_zone.zone_id).state;
 
     toggle_play = () => {
         return new Promise(resolve => {
-            this.core.services.RoonApiTransport.control(this.current_zone, "playpause", resolve);
+            this.transport().control(this.current_zone, "playpause", resolve);
         })
     }
 
-    next_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "next");
-    previous_track = () => this.core.services.RoonApiTransport.control(this.current_zone, "previous");
+    next_track = () => this.transport().control(this.current_zone, "next");
+    previous_track = () => this.transport().control(this.current_zone, "previous");
 
     turn_volume = (value) => {
         let volume = {};
 
         let refresh_volume = (o) => {
             return new Promise(resolve => {
-                this.core.services.RoonApiTransport.get_outputs((msg, body) => {
+                this.transport().get_outputs((msg, body) => {
                     resolve(body.outputs.find(_o => _o.output_id === o.output_id).volume)
                 });
             })
@@ -33,7 +35,7 @@ class RoonControl {
         let change_volume = () => {
             return new Promise(resolve => {
                 this.current_zone.outputs.filter(o => o.volume).forEach((o) => {
-                    this.core.services.RoonApiTransport.change_volume(o, 'relative', value, (_) => {
+                    this.transport().change_volume(o, 'relative', value, (_) => {
                         resolve(o);
                     });
                 })
@@ -49,27 +51,25 @@ class RoonControl {
             .catch(e => logger.warn(e));
     }
 
-    change_current_zone_by_display_name = (name) => {
-        const old_name = this.current_zone.display_name;
-
-        return this.fetch_all_zones()
-            .then(zones => {
-                const new_zone = zones.find(z => z.display_name === name);
-                if (new_zone) {
-                    return this.current_zone = new_zone;
-                } else {
-                    logger.warn(`No zone is available by name: ${name}.`);
-                    return this.current_zone = zones.find(z => z.display_name === old_name);
-                }
-            })
-            .then(z => logger.info(`${z.display_name} is the current zone now.`))
-            .catch(e => logger.warn(e));
+    transfer_zone = async (zone) => {
+        let old_z = this.current_zone;
+        this.change_current_zone(zone)
+            .then(new_z => this.transport().transfer_zone(old_z, new_z, () => Promise.resolve(this.current_zone)));
     }
 
-    fetch_all_zones = () => {
-        return new Promise(resolve => {
-            this.core.services.RoonApiTransport.get_zones((msg, body) => resolve(body.zones))
-        })
+    change_current_zone = (zone) => {
+        const old = this.current_zone;
+
+        let new_zone = this.transport().zone_by_object(zone);
+        if (new_zone) {
+            this.current_zone = new_zone;
+        } else {
+            logger.warn(`zone: ${zone.name} is now available.`);
+            this.current_zone = old;
+        }
+
+        logger.info(`${this.current_zone.display_name} is the current zone now.`);
+        return Promise.resolve(this.current_zone);
     }
 }
 
