@@ -15,7 +15,7 @@ class Nuroon {
                 subscription.connect(device);
                 forever(
                     async () => {
-                        await delay(30_000);
+                        await delay(5_000);
                         subscription.heartbeat(device);
                     },
                     (err) => {

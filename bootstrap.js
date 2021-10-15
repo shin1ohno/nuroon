@@ -23,7 +23,7 @@ const actions = {
     },
     toggle_play: (device) => {
         roon.toggle_play()
-            .then(async () => await delay(100))
+            .then(async () => await delay(50))
             .then(() => roon.play_state())
             .then(
                 status => {
