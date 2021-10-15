@@ -109,15 +109,13 @@ FileConfig.load_config_file()
                             return rel_vol;
                         });
             },
-            fly: (device, direction, speed) => {
+            fly: (device, direction) => {
                 switch (direction) {
                     case (Nuimo.Fly.LEFT):
                         actions[roon.roon_settings.x.fly_left](device)
-                        logger.info(`Flew left by speed ${speed}`);
                         break;
                     case (Nuimo.Fly.RIGHT):
                         actions[roon.roon_settings.x.fly_right](device)
-                        logger.info(`Flew right by speed ${speed}`);
                         break;
                 }
             },
