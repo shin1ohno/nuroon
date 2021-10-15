@@ -4,10 +4,6 @@ const RoonApi = require("node-roon-api"),
     logger = require('pino')();
 const RoonSetting = require("./roon_setting.js");
 
-const DEFAULT_ZONE = "160198e236817e736bbd314a165cb0b89e53"
-// Qutest: "160103b6b4a1dd24c3513106b882312e4c58"
-// Study: "160198e236817e736bbd314a165cb0b89e53"
-
 class RoonControl {
     constructor() {
         this.core = undefined;
