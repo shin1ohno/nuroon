@@ -28,7 +28,15 @@ class Actions {
                     matrix(status, this.device);
                     logger.debug(status);
                     return status;
-                });
+                })
+            .catch(e => {
+                logger.warn(e);
+                logger.warn(`We lost the zone? ${this.roon.current_zone}`);
+                logger.warn("Available zones:")
+                this.roon.transport().get_zones((status, body) => {
+                    logger.warn(body.zones);
+                })
+            });
     }
 
     next_track = () => {
