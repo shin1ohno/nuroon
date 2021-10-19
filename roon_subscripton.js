@@ -60,7 +60,15 @@ class RoonSubscription {
             .then(msg => this.current_zone = msg.zones.find((z) => z.display_name === this.roon_settings.x.default_zone.name))
             .then(zone => {
                 logger.info(`Subscribed to ${this.core.display_name} (${this.core.display_version}).`);
-                logger.info(`Controlling ${zone.display_name} ${zone.state} ${zone.now_playing.one_line.line1}`);
+
+                if (zone && zone.now_playing) {
+                    logger.info(`Controlling ${zone.display_name} ${zone.state} ${zone.now_playing.one_line.line1}`);
+                } else if (zone) {
+                    logger.info(`Controlling ${zone.display_name}`);
+                } else {
+                    logger.info("No zone is available")
+                }
+
                 return this;
             }).catch(e => logger.warn(e));
     }
