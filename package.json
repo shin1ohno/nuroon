@@ -2,6 +2,8 @@
   "name": "nuroon",
   "version": "1.0.0",
   "dependencies": {
+    "@sentry/node": "^6.13.3",
+    "@sentry/tracing": "^6.13.3",
     "async": "^3.2.1",
     "node-roon-api": "github:roonlabs/node-roon-api",
     "node-roon-api-settings": "github:roonlabs/node-roon-api-settings",
