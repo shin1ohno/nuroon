@@ -10,7 +10,13 @@ class RoonControl {
     transport = () => this.core.services.RoonApiTransport
 
     refreshed_zone = (zone_id) => this.transport().zone_by_zone_id(zone_id) || {};
-    play_state = () => this.refreshed_zone(this.current_zone.zone_id).state;
+    play_state = () => {
+        if (this.current_zone) {
+            return this.refreshed_zone(this.current_zone.zone_id).state;
+        } else {
+            logger.warn("No current zone set.")
+        }
+    }
 
     toggle_play = () => {
         return new Promise(resolve => {
@@ -67,7 +73,6 @@ class RoonControl {
             logger.warn(`zone: ${zone.name} is not available.`);
             this.current_zone = old;
         }
-
         logger.info(`${this.current_zone.display_name} is the current zone now.`);
         return Promise.resolve(this.current_zone);
     }
