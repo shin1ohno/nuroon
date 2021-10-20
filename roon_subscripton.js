@@ -8,7 +8,7 @@ class RoonSubscription {
     constructor() {
         this.core = undefined;
         this.current_zone = undefined;
-        this.status = undefined
+        this.roon_status = undefined
         this.roon_settings = undefined;
     }
 
@@ -19,11 +19,11 @@ class RoonSubscription {
                     {
                         core_paired: (core) => {
                             this.core = core;
-                            this.status.set_status("Paired to core", false);
+                            this.roon_status.set_status("Paired to core", false);
                             logger.info(`Subscribed to ${this.core.display_name} (${this.core.display_version}).`);
                             core.services.RoonApiTransport.subscribe_zones((status, body) => {
                                 if (status === "Subscribed") {
-                                    this.status.set_status("Subscribed to zones", false);
+                                    this.roon_status.set_status("Subscribed to zones", false);
                                     resolve(core);
                                 }
                             });
@@ -37,12 +37,12 @@ class RoonSubscription {
             )
 
             this.roon_settings = new RoonSetting(roon, conf.x);
-            this.status = new RoonApiStatus(roon);
+            this.roon_status = new RoonApiStatus(roon);
             roon.init_services({
                 required_services: [RoonApiTransport],
-                provided_services: [this.status, this.roon_settings.provider],
+                provided_services: [this.roon_status, this.roon_settings.provider],
             });
-            this.status.set_status("Starting discovery", false);
+            this.roon_status.set_status("Starting discovery", false);
             roon.start_discovery();
         });
     }
@@ -62,7 +62,7 @@ class RoonSubscription {
                             let selection = msg.zones[0]
                             let message = `Default zone(${this.roon_settings.x.default_zone.name}) is not available. Falled back to ${selection.display_name}.`;
                             logger.warn(message);
-                            this.status.set_status(message, true);
+                            this.roon_status.set_status(message, true);
                             resolve(selection);
                         }
                     })
@@ -82,6 +82,8 @@ class RoonSubscription {
                 } else {
                     logger.info("No zone is available");
                 }
+
+                this.roon_status.set_status(`Controlling ${zone.display_name}`, false);
 
                 return this;
             }).catch(e => logger.warn(e));

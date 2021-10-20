@@ -31,7 +31,7 @@ try {
             return conf;
         })
         .then(conf => (new RoonSubscription()).subscribe_to_roon(conf))
-        .then(subscription => new RoonControl(subscription.core, subscription.current_zone, subscription.roon_settings))
+        .then(subscription => new RoonControl(subscription.core, subscription.current_zone, subscription.roon_settings, subscription.roon_status))
         .then((roon) => {
             let device = undefined;
             let actions = undefined;

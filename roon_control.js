@@ -1,10 +1,11 @@
 const logger = require('pino')();
 
 class RoonControl {
-    constructor(core, initial_zone, roon_settings) {
+    constructor(core, initial_zone, roon_settings, roon_status) {
         this.core = core;
         this.roon_settings = roon_settings;
         this.current_zone = initial_zone;
+        this.roon_status = roon_status;
     }
 
     transport = () => this.core.services.RoonApiTransport
@@ -14,7 +15,7 @@ class RoonControl {
         if (this.current_zone) {
             return this.refreshed_zone(this.current_zone.zone_id).state;
         } else {
-            logger.warn("No current zone set.")
+            logger.warn("No current zone set.");
         }
     }
 
@@ -31,7 +32,7 @@ class RoonControl {
         let refresh_volume = (o) => {
             return new Promise(resolve => {
                 this.transport().get_outputs((msg, body) => {
-                    resolve(body.outputs.find(_o => _o.output_id === o.output_id).volume)
+                    resolve(body.outputs.find(_o => _o.output_id === o.output_id).volume);
                 });
             })
         }
@@ -72,6 +73,7 @@ class RoonControl {
             this.current_zone = old;
         }
         logger.info(`${this.current_zone.display_name} is the current zone now.`);
+        this.roon_status.set_status(`Controlling ${this.current_zone.display_name}`, false);
         return Promise.resolve(this.current_zone);
     }
 }
