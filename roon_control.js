@@ -28,8 +28,6 @@ class RoonControl {
     previous_track = () => this.transport().control(this.current_zone, "previous");
 
     turn_volume = (value) => {
-        let volume = {};
-
         let refresh_volume = (o) => {
             return new Promise(resolve => {
                 this.transport().get_outputs((msg, body) => {
@@ -53,7 +51,7 @@ class RoonControl {
 
         return volume_changed()
             .then(new_volume_set)
-            .then(new_vol => volume = new_vol)
+            .then(new_vol => new_vol)
             .catch(e => logger.warn(e));
     }
 
