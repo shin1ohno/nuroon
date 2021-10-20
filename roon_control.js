@@ -64,7 +64,7 @@ class RoonControl {
         if (new_zone) {
             this.current_zone = new_zone;
         } else {
-            logger.warn(`zone: ${zone.name} is now available.`);
+            logger.warn(`zone: ${zone.name} is not available.`);
             this.current_zone = old;
         }
 
