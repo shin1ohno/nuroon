@@ -132,5 +132,6 @@ try {
             })
         }).catch(e => Sentry.captureException(e) && logger.warn(e));
 } catch (e) {
+    loger.warn(e);
     Sentry.captureException(e);
 }
