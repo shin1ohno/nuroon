@@ -1,0 +1,15 @@
+{
+    "roon_plugin_props": {
+        "extension_id": "be.ohno.nuroon",
+        "display_name": "Nuimo as Roon Controller",
+        "display_version": "1.0.0",
+        "publisher": "Shinichi Ohno",
+        "email": "shin1ohno@gmail.com",
+        "website": "https://example.com",
+        "log_level": "none"
+    },
+    "development": {
+        "sentry_dsn": "https://3c52e0f69a9d49bfbeae563056bafecc@o1044896.ingest.sentry.io/6020136",
+        "sentry_sample_rate": 1
+    }
+}
