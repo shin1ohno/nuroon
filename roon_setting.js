@@ -162,7 +162,7 @@ const layout = (settings) => {
 class RoonSetting {
     constructor(roon, initial_props) {
         this.roon = roon;
-        this.x = initial_props;
+        this.x = Object.assign(default_settings, initial_props);
 
         this.provider = new RoonApiSettings(this.roon, {
             get_settings: this.get_settings,
