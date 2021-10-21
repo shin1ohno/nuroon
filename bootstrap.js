@@ -88,15 +88,19 @@ try {
                 },
                 rotate: (amount) => {
                     logger.debug(`Rotated by ${amount}`);
-                    roon.turn_volume(amount / parseFloat(roon.roon_settings.x.rotary_damping_factor).toFixed(1))
-                        .then(volume => Math.round(10 * (volume.value - volume.hard_limit_min) / (volume.hard_limit_max - volume.hard_limit_min)))
-                        .then(rel_vol => Math.min(rel_vol, 9))
-                        .then(
-                            rel_vol => {
-                                matrix(`volume_changed_${rel_vol}`, device);
-                                logger.debug(`volume: ${rel_vol}`);
-                                return rel_vol;
-                            });
+                    if (typeof roon.current_zone === "undefined") {
+                        logger.warn("No zone to change the volume.");
+                    } else {
+                        roon.turn_volume(amount / parseFloat(roon.roon_settings.x.rotary_damping_factor).toFixed(1))
+                            .then(volume => Math.round(10 * (volume.value - volume.hard_limit_min) / (volume.hard_limit_max - volume.hard_limit_min)))
+                            .then(rel_vol => Math.min(rel_vol, 9))
+                            .then(
+                                rel_vol => {
+                                    matrix(`volume_changed_${rel_vol}`, device);
+                                    logger.debug(`volume: ${rel_vol}`);
+                                    return rel_vol;
+                                });
+                    }
                 },
                 fly: (direction) => {
                     switch (direction) {
