@@ -58,20 +58,30 @@ class RoonControl {
 
     transfer_zone = async (zone) => {
         let old_z = this.current_zone;
-        this.change_current_zone(zone)
-            .then(new_z => this.transport().transfer_zone(old_z, new_z, () => Promise.resolve(this.current_zone)));
+
+        if (old_z) {
+            return this.change_current_zone(zone)
+                .then(new_z => this.transport().transfer_zone(old_z, new_z, () => Promise.resolve(this.current_zone)));
+        } else {
+            return this.change_current_zone(zone)
+        }
     }
 
     change_current_zone = (zone) => {
-        const old = this.current_zone;
+        const old_zone = this.current_zone;
+        const new_zone = this.transport().zone_by_object(zone);
 
-        let new_zone = this.transport().zone_by_object(zone);
         if (new_zone) {
             this.current_zone = new_zone;
         } else {
             logger.warn(`zone: ${zone.name} is not available.`);
-            this.current_zone = old;
+            if (old_zone) {
+                this.current_zone = old_zone;
+            } else {
+
+            }
         }
+
         logger.info(`${this.current_zone.display_name} is the current zone now.`);
         this.roon_status.set_status(`Controlling ${this.current_zone.display_name}`, false);
         return Promise.resolve(this.current_zone);
