@@ -1,5 +1,5 @@
 const matrix = require("./matrix.js");
-const logger = require("pino")();
+const logger = require("pino")({level: 'trace'});
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 class Actions {

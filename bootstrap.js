@@ -5,7 +5,7 @@ const Nuroon = require("./nuroon");
 const RoonControl = require("./roon_control");
 const RoonSubscription = require("./roon_subscripton");
 const Actions = require("./actions");
-const logger = require("pino")();
+const logger = require("pino")({level: 'trace'});
 const forever = require("async/forever");
 const FileConfig = require("./file_config.js");
 const matrix = require("./matrix.js");
@@ -136,6 +136,6 @@ try {
             })
         }).catch(e => Sentry.captureException(e) && logger.warn(e));
 } catch (e) {
-    loger.warn(e);
+    logger.warn(e);
     Sentry.captureException(e);
 }

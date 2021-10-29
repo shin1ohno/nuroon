@@ -1,6 +1,6 @@
 const RoonApiSettings = require("node-roon-api-settings");
 const FileConfig = require("./file_config.js");
-const logger = require("pino")();
+const logger = require("pino")({level: 'trace'});
 const PROPS_KEY = "x";
 
 const default_settings = {

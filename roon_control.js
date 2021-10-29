@@ -1,4 +1,4 @@
-const logger = require('pino')();
+const logger = require('pino')({level: 'trace'});
 
 class RoonControl {
     constructor(core, initial_zone, roon_settings, roon_status) {

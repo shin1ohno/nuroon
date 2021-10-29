@@ -2,7 +2,7 @@ const RoonApi = require("node-roon-api");
 const RoonSetting = require("./roon_setting.js");
 const RoonApiStatus = require("node-roon-api-status");
 const RoonApiTransport = require("node-roon-api-transport");
-const logger = require("pino")();
+const logger = require("pino")({level: 'trace'});
 
 class RoonSubscription {
     constructor() {
