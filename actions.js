@@ -1,6 +1,9 @@
 const matrix = require("./matrix.js");
 const logger = require("pino")({level: 'trace'});
 const delay = ms => new Promise(res => setTimeout(res, ms));
+const NC = require('netcat/client')
+const nc = new NC()
+nc.addr("fd1d:9547:b6f7:6:cfb:a221:cde6:58ef").port(9999)
 
 class Actions {
     constructor(roon, device) {
@@ -51,7 +54,10 @@ class Actions {
 
     transfer_zone = (zone) => {
         this.roon.transfer_zone(zone)
-            .then(() => matrix("zone_switched", this.device));
+            .then(() => {
+		    nc.connect().send(zone.name);
+		    matrix("zone_switched", this.device);
+	    });
     }
 
     switch_zone = (zone) => {

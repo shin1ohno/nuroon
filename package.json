@@ -5,6 +5,7 @@
     "@sentry/node": "^6.13.3",
     "@sentry/tracing": "^6.13.3",
     "async": "^3.2.1",
+    "netcat": "^1.5.0",
     "node-roon-api": "github:roonlabs/node-roon-api",
     "node-roon-api-settings": "github:roonlabs/node-roon-api-settings",
     "node-roon-api-status": "github:roonlabs/node-roon-api-status",
