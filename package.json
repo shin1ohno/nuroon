@@ -1,0 +1,24 @@
+{
+  "name": "nuroon",
+  "version": "1.0.0",
+  "description": "[Numio](https://www.senic.com/blogs/news/discontinuing-nuimo-products) as a controller of [Roon](https://roonlabs.com)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shin1ohno/nuroon.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shin1ohno/nuroon/issues"
+  },
+  "homepage": "https://github.com/shin1ohno/nuroon#readme",
+  "devDependencies": {
+    "@types/node": "^16.11.9",
+    "typescript": "^4.5.2"
+  }
+}
