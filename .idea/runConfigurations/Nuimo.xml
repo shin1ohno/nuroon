@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Nuimo" type="ChromiumRemoteDebugType" factoryName="Chromium Remote" host="192.168.1.58" port="9229" restartOnDisconnect="true">
+    <method v="2" />
+  </configuration>
+</component>
