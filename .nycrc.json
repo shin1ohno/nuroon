@@ -10,8 +10,8 @@
     ".ts"
   ],
   "reporter": [
-    "text-summary",
-    "html"
+    "html",
+    "text"
   ],
   "report-dir": "./coverage"
 }
