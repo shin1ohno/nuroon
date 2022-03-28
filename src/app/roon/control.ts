@@ -5,35 +5,40 @@ enum Command {
   Stop = "stop",
 }
 
-type simpleControls =
-  | "togglePlay"
-  | "previousTrack"
-  | "nextTrack"
-  | "noop";
+type simpleControls = "togglePlay" | "previousTrack" | "nextTrack" | "noop";
 
 type parameterControls = "turnVolume";
 
+type roonOutputState =
+  | "playing"
+  | "paused"
+  | "loading"
+  | "stopped"
+  | "next"
+  | "previous";
+
 class Control {
-  constructor(private transport: any, private outputId: string) {}
-
-  noop(): void {
-    // do nothing
+  constructor(private transport: any, private outputId: string) {
   }
 
-  togglePlay(): void {
-    this.controlOutput(Command.TogglePlay);
+  noop(): Promise<roonOutputState> {
+    return this.roonOutput().then((o) => o.state as roonOutputState);
   }
 
-  stop(): void {
-    this.controlOutput(Command.Stop);
+  togglePlay(): Promise<roonOutputState> {
+    return this.controlOutput(Command.TogglePlay);
   }
 
-  nextTrack(): void {
-    this.controlOutput(Command.NextTrack);
+  stop(): Promise<roonOutputState> {
+    return this.controlOutput(Command.Stop);
   }
 
-  previousTrack(): void {
-    this.controlOutput(Command.PreviousTrack);
+  nextTrack(): Promise<roonOutputState> {
+    return this.controlOutput(Command.NextTrack).then((_) => "next");
+  }
+
+  previousTrack(): Promise<roonOutputState> {
+    return this.controlOutput(Command.PreviousTrack).then((_) => "previous");
   }
 
   turnVolume(value: number): void {
@@ -44,12 +49,14 @@ class Control {
 
   volumePct(): Promise<number> {
     return this.volumeObject().then(
-      (v) => ((v.value - v.min) / (v.max - v.min)) * 100
+      (v) => ((v.value - v.hard_limit_min) / (v.hard_limit_max - v.hard_limit_min)) * 100
     );
   }
 
-  isPlaying(): boolean {
-    return true;
+  isPlaying(): Promise<boolean> {
+    return this.roonOutput().then((o) => {
+      return this.transport.zone_by_zone_id(o.zone_id).state === "playing"
+    })
   }
 
   private volumeObject(): Promise<any> {
@@ -79,16 +86,28 @@ class Control {
           if (fail) {
             reject("Failed to get Roon Outputs");
           } else {
-            resolve(body.outputs.find(o => o.output_id === this.outputId));
+            resolve(body.outputs.find((o) => o.output_id === this.outputId));
           }
         }
       );
     });
   }
 
-  private controlOutput(command: string): void {
-    // noinspection TypeScriptValidateJSTypes
-    this.roonOutput().then((o) => this.transport.control(o, command));
+  private controlOutput(command: string): Promise<roonOutputState> {
+    return new Promise((resolve, reject) => {
+      // noinspection TypeScriptValidateJSTypes
+      this.roonOutput().then((o) =>
+        this.transport.control(o, command, (fail: boolean) => {
+          if (fail) {
+            reject(`Failed to ${ command }.`);
+          } else {
+            setTimeout(() => {
+              resolve(this.transport.zone_by_zone_id(o.zone_id).state);
+            }, 70); // We need to wait some time to get the latest status
+          }
+        })
+      );
+    });
   }
 }
 
