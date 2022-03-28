@@ -3,8 +3,12 @@ import { ControllerCore } from "./roon/controllerCore";
 import {
   digitGlyphs,
   DisplayTransition,
+  emptyGlyph,
+  errorGlyph,
   filledGlyph,
+  Glyph,
   NuimoControlDevice,
+  stopGlyph,
 } from "rocket-nuimo";
 import { pino } from "pino";
 import { ChildProcess, fork } from "child_process";
@@ -14,6 +18,196 @@ import { ConfigStore } from "./configStore";
 import * as util from "util";
 
 export const logger = pino({ level: "trace" });
+
+const pauseGlyph = Glyph.fromString([
+  "  ** **  ",
+  "  ** **  ",
+  "  ** **  ",
+  "  ** **  ",
+  "  ** **  ",
+  "  ** **  ",
+  "  ** **  ",
+  "  ** **  ",
+  "  ** **  ",
+]);
+
+const playingGlyph = Glyph.fromString([
+  "  **     ",
+  "  ***    ",
+  "  ****   ",
+  "  *****  ",
+  "  ****** ",
+  "  *****  ",
+  "  ****   ",
+  "  ***    ",
+  "  **     ",
+]);
+
+const rightGlyphStrings = [
+  " **    *",
+  " ***   *",
+  " ****  *",
+  " ***** *",
+  " *******",
+  " ***** *",
+  " ****  *",
+  " ***   *",
+  " **    *",
+];
+
+const rightGlyph = Glyph.fromString(rightGlyphStrings);
+
+const leftGlyph = Glyph.fromString(
+  rightGlyphStrings.map((r) => r.split("").reverse().join(""))
+);
+
+const volume1 = Glyph.fromString([
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "    *    ",
+]);
+
+const volume2 = Glyph.fromString([
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "    *    ",
+  "    *    ",
+]);
+
+const volume3 = Glyph.fromString([
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+]);
+
+const volume4 = Glyph.fromString([
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+]);
+
+const volume5 = Glyph.fromString([
+  "         ",
+  "         ",
+  "         ",
+  "         ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+]);
+
+const volume6 = Glyph.fromString([
+  "         ",
+  "         ",
+  "         ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+]);
+
+const volume7 = Glyph.fromString([
+  "         ",
+  "         ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+]);
+
+const volume8 = Glyph.fromString([
+  "         ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+]);
+
+const volume9 = Glyph.fromString([
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+  "    *    ",
+]);
+
+export const controlGlyphs: {
+  playing: Glyph;
+  paused: Glyph;
+  stopped: Glyph;
+  loading: Glyph;
+  next: Glyph;
+  previous: Glyph;
+} = {
+  playing: playingGlyph,
+  paused: pauseGlyph,
+  stopped: stopGlyph,
+  loading: errorGlyph,
+  next: rightGlyph,
+  previous: leftGlyph,
+};
+
+export const volumeGlyphs: {
+  volume0: Glyph;
+  volume1: Glyph;
+  volume2: Glyph;
+  volume3: Glyph;
+  volume4: Glyph;
+  volume5: Glyph;
+  volume6: Glyph;
+  volume7: Glyph;
+  volume8: Glyph;
+  volume9: Glyph;
+} = {
+  volume0: emptyGlyph,
+  volume1: volume1,
+  volume2: volume2,
+  volume3: volume3,
+  volume4: volume4,
+  volume5: volume5,
+  volume6: volume6,
+  volume7: volume7,
+  volume8: volume8,
+  volume9: volume9,
+};
 
 class NuRoon {
   private static pairs: Array<NuRoon> = [];
@@ -43,7 +237,10 @@ class NuRoon {
       .then((res) => (this.active = res));
   }
 
-  public static findOrCreate(roonCore: BootstrapCore, nuimo: NuimoControlDevice): NuRoon {
+  public static findOrCreate(
+    roonCore: BootstrapCore,
+    nuimo: NuimoControlDevice
+  ): NuRoon {
     const existing = this.find(roonCore, nuimo);
     if (existing) {
       return existing;
@@ -78,7 +275,10 @@ class NuRoon {
       .then((_) => this);
   }
 
-  public static unpair(roonCore: BootstrapCore, nuimo: NuimoControlDevice | NuimoLike): void {
+  public static unpair(
+    roonCore: BootstrapCore,
+    nuimo: NuimoControlDevice | NuimoLike
+  ): void {
     const res = this.find(roonCore, nuimo);
     if (res) {
       res.disconnect();
@@ -86,9 +286,21 @@ class NuRoon {
     }
   }
 
+  public static findWithIdPair(
+    nuimoId: string,
+    roonCoreId: string
+  ): NuRoon | undefined {
+    return this.pairs.find(
+      (p) => p && p.nuimo.id === nuimoId && roonCoreId === p.roonCore.id()
+    );
+  }
+
   startControl(): void {
     if (this.roonCore instanceof ControllerCore) {
       const c = this.roonCore as ControllerCore;
+      c.transport().subscribe_zones((status: string, body: any) => {
+        // do nothing
+      });
       c.transport().subscribe_outputs((status: string, body: any) => {
         switch (status) {
         case "Subscribed":
@@ -115,12 +327,6 @@ class NuRoon {
     }
   }
 
-  public static findWithIdPair(nuimoId: string, roonCoreId: string): NuRoon | undefined {
-    return this.pairs.find(
-      (p) => p && p.nuimo.id === nuimoId && roonCoreId === p.roonCore.id()
-    );
-  }
-
   disconnect(): void {
     this.nuimo.disconnect();
     const i = NuRoon.pairs.indexOf(this);
@@ -136,13 +342,11 @@ class NuRoon {
 
   ping(): void {
     if (this.nuimo) {
-      this.nuimo.brightness = 0.1;
-      this.nuimo.displayGlyph(
-        filledGlyph.resize(1, 1), {
-          transition: DisplayTransition.Immediate,
-          timeoutMs: 10,
-        }
-      )
+      this.nuimo.displayGlyph(filledGlyph.resize(1, 1), {
+        transition: DisplayTransition.Immediate,
+        timeoutMs: 50,
+        brightness: 0.1
+      });
     } else {
       logger.info("Nuimo is not connected.");
     }
@@ -215,34 +419,57 @@ class NuRoon {
         };
 
         Object.entries(settings).forEach((entry) => {
-          const e = entry[0];
-          const c = entry[1];
+          const eventName = entry[0];
+          const controlName = entry[1];
 
-          if (e in simpleOperations) {
-            const s = fromEvent(this.nuimo, e).subscribe(() =>
-              control[c as simpleControls]()
+          if (eventName in simpleOperations) {
+            const s = fromEvent(this.nuimo, eventName).subscribe(() =>
+              control[controlName as simpleControls]().then((state) => {
+                logger.info(state);
+                if (state in controlGlyphs) {
+                  this.nuimo.displayGlyph(controlGlyphs[state], {
+                    transition: DisplayTransition.CrossFade,
+                    timeoutMs: 500,
+                    brightness: 1,
+                  });
+                }
+              })
             );
             this.bindings.push(s);
-          } else if (e in parameterOperations) {
-            const s = fromEvent(this.nuimo, e).subscribe((e) => {
+          } else if (eventName in parameterOperations) {
+            const s = fromEvent(this.nuimo, eventName).subscribe((e) => {
               const vol =
                 (e as [number])[0] * advancedParameters.rotary_damping_factor;
-              control[c as parameterControls](vol);
-              logger.info(c);
-              logger.info(vol);
+              control[controlName as parameterControls](vol);
+              control.volumePct().then((n) => {
+                const i = Math.round(n / 10);
+                const key = `volume${i}`;
+                logger.debug(`volume: ${i}`);
+                if (key in volumeGlyphs) {
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore
+                  this.nuimo.displayGlyph(volumeGlyphs[key], {
+                    timeoutMs: 1000,
+                    transition: DisplayTransition.Immediate,
+                    brightness: 1,
+                  })
+                }
+              })
             });
             this.bindings.push(s);
-          } else if (e in advancedParameters) {
+          } else if (eventName in advancedParameters) {
             const s = interval(
               advancedParameters.heartbeat_delay * 1000
             ).subscribe(() => {
-              if (control.isPlaying()) {
-                this.ping();
-              }
+              control.isPlaying().then((res) => {
+                if (res) {
+                  this.ping();
+                }
+              });
             });
             this.bindings.push(s);
           } else {
-            logger.warn(`Unhandled operation: ${e}, ${util.inspect(c)}.`);
+            logger.warn(`Unhandled operation: ${eventName}, ${util.inspect(controlName)}.`);
           }
         });
         logger.info(`settings: ${util.inspect(settings)}`);
