@@ -5,29 +5,27 @@ import { NuRoon } from "../nuRoon";
 
 const default_settings = {
   default_zone: {},
-  long_left: {},
-  long_right: {},
-  long_top: {},
-  long_bottom: {},
-  press: "toggle_play",
-  swipe_left: "previous_track",
-  swipe_right: "next_track",
-  swipe_up: "noop",
-  swipe_down: "noop",
-  touch_left: "previous_track",
-  touch_right: "next_track",
-  touch_top: "noop",
-  touch_bottom: "noop",
-  fly_left: "noop",
-  fly_right: "noop",
-  rotary_damping_factor: 25,
+  longTouchLeft: {},
+  longTouchRight: {},
+  longTouchBottom: {},
+  select: "togglePlay",
+  swipeLeft: "previousTrack",
+  swipeRight: "nextTrack",
+  swipeUp: "noop",
+  swipeDown: "noop",
+  touchLeft: "previousTrack",
+  touchRight: "nextTrack",
+  touchTop: "noop",
+  touchBottom: "noop",
+  rotate: "turnVolume",
+  rotary_damping_factor: 100,
   heartbeat_delay: 5,
 };
 
 const action_values = [
-  { title: "Toggle Play/Pause", value: "toggle_play" },
-  { title: "Previous Track", value: "previous_track" },
-  { title: "Next Track", value: "next_track" },
+  { title: "Toggle Play/Pause", value: "togglePlay" },
+  { title: "Previous Track", value: "previousTrack" },
+  { title: "Next Track", value: "nextTrack" },
   { title: "No action", value: "noop" },
 ];
 
@@ -51,22 +49,17 @@ const layout = (settings: any) => {
     {
       type: "zone",
       title: "Zone transfer with long left tap",
-      setting: "long_left",
+      setting: "longTouchLeft",
     },
     {
       type: "zone",
       title: "Zone transfer with long right tap",
-      setting: "long_right",
-    },
-    {
-      type: "zone",
-      title: "Zone transfer with long top tap (not recommended)",
-      setting: "long_top",
+      setting: "longTouchRight",
     },
     {
       type: "zone",
       title: "Zone transfer with long bottom tap",
-      setting: "long_bottom",
+      setting: "longTouchBottom",
     },
     {
       type: "title",
@@ -75,68 +68,64 @@ const layout = (settings: any) => {
     {
       type: "dropdown",
       title: "Press Action",
-      setting: "press",
+      setting: "select",
       values: action_values,
     },
     {
       type: "dropdown",
       title: "Swipe Left Action",
-      setting: "swipe_left",
+      setting: "swipeLeft",
       values: action_values,
     },
     {
       type: "dropdown",
       title: "Swipe Right Action",
-      setting: "swipe_right",
+      setting: "swipeRight",
       values: action_values,
     },
     {
       type: "dropdown",
       title: "Swipe Up Action",
-      setting: "swipe_up",
+      setting: "swipeUp",
       values: action_values,
     },
     {
       type: "dropdown",
       title: "Swipe Down Action",
-      setting: "swipe_down",
+      setting: "swipeDown",
       values: action_values,
     },
     {
       type: "dropdown",
       title: "Touch Left Action",
-      setting: "touch_left",
+      setting: "touchLeft",
       values: action_values,
     },
     {
       type: "dropdown",
       title: "Touch Right Action",
-      setting: "touch_right",
+      setting: "touchRight",
       values: action_values,
     },
     {
       type: "dropdown",
       title: "Touch Top Action",
-      setting: "touch_top",
+      setting: "touchTop",
       values: action_values,
     },
     {
       type: "dropdown",
       title: "Touch Bottom Action",
-      setting: "touch_bottom",
+      setting: "touchBottom",
       values: action_values,
     },
     {
       type: "dropdown",
-      title: "Fly Left Action",
-      setting: "fly_left",
-      values: action_values,
-    },
-    {
-      type: "dropdown",
-      title: "Fly Right Action",
-      setting: "fly_right",
-      values: action_values,
+      title: "Rotate Acton",
+      setting: "rotate",
+      values: [
+        { title: "Volume", value: "turnVolume" },
+      ],
     },
     {
       type: "group",
@@ -176,6 +165,7 @@ class ControllerSetting {
           n.connect().then((r) => {
             if (r) {
               n.iAmHere();
+              n.updateSettings();
             }
           });
         }
@@ -195,7 +185,20 @@ class ControllerSetting {
           ConfigStore.saveControllerConfig(
             ControllerSetting.settingsToConfig(settings.values, this.nuimoId),
             this.nuimoId
-          );
+          ).then(() => {
+            const n = NuRoon.findWithIdPair(
+              this.nuimoId,
+              this.roon.paired_core_id
+            );
+            if (n) {
+              n.connect().then((r) => {
+                if (r) {
+                  n.iAmHere();
+                  n.updateSettings();
+                }
+              });
+            }
+          });
         }
       },
     });

@@ -3,19 +3,22 @@ import { ControllerCore } from "./roon/controllerCore";
 import {
   digitGlyphs,
   DisplayTransition,
+  filledGlyph,
   NuimoControlDevice,
 } from "rocket-nuimo";
 import { pino } from "pino";
 import { ChildProcess, fork } from "child_process";
-import { fromEvent } from "rxjs";
-import { Control } from "./roon/control";
+import { fromEvent, interval, Subscription } from "rxjs";
+import { Control, parameterControls, simpleControls } from "./roon/control";
 import { ConfigStore } from "./configStore";
+import * as util from "util";
 
 export const logger = pino({ level: "trace" });
 
 class NuRoon {
   private static pairs: Array<NuRoon> = [];
   private controllerProcess!: ChildProcess;
+  private bindings: Array<Subscription> = [];
 
   constructor(
     public roonCore: BootstrapCore | ControllerCore,
@@ -40,13 +43,13 @@ class NuRoon {
       .then((res) => (this.active = res));
   }
 
-  disconnect(): void {
-    this.nuimo.disconnect();
-    if (this.controllerProcess) {
-      this.controllerProcess.kill("SIGHUP");
+  public static findOrCreate(roonCore: BootstrapCore, nuimo: NuimoControlDevice): NuRoon {
+    const existing = this.find(roonCore, nuimo);
+    if (existing) {
+      return existing;
+    } else {
+      return new NuRoon(roonCore, nuimo, false);
     }
-    this.active = false;
-    logger.info(`Disconnected Nuimo: ${this.nuimo.id}`);
   }
 
   exposeToRoonSettings(): Promise<NuRoon> {
@@ -75,44 +78,21 @@ class NuRoon {
       .then((_) => this);
   }
 
+  public static unpair(roonCore: BootstrapCore, nuimo: NuimoControlDevice | NuimoLike): void {
+    const res = this.find(roonCore, nuimo);
+    if (res) {
+      res.disconnect();
+      delete this.pairs[this.pairs.indexOf(res)];
+    }
+  }
+
   startControl(): void {
     if (this.roonCore instanceof ControllerCore) {
       const c = this.roonCore as ControllerCore;
       c.transport().subscribe_outputs((status: string, body: any) => {
         switch (status) {
         case "Subscribed":
-          ConfigStore.loadControllerConfig(this.nuimo.id).then((config) => {
-            const control = new Control(
-              c.transport(),
-              config.settings["default_zone"]["output_id"]
-            );
-
-            const simpleOperations = {
-              select: "togglePlay",
-              swipeRight: "nextTrack",
-              swipeLeft: "previousTrack",
-              touchLeft: "previousTrack",
-              touchRight: "nextTrack",
-            };
-
-            const parameterOperations = {
-              rotate: "turnVolume",
-            };
-
-            Object.entries(simpleOperations).forEach(
-              (entry: [string, string]) =>
-                fromEvent(this.nuimo, entry[0]).subscribe(() =>
-                  eval(`control.${entry[1]}()`)
-                )
-            );
-
-            Object.entries(parameterOperations).forEach(
-              (entry: [string, string]) =>
-                fromEvent(this.nuimo, entry[0]).subscribe((e) =>
-                  eval(`control.${entry[1]}(e[0] * 100)`)
-                )
-            );
-          });
+          this.updateSettings();
           break;
         case "NetworkError":
           this.disconnect();
@@ -120,6 +100,7 @@ class NuRoon {
           logger.warn(`Rebooting the controller core.`);
           process.chdir("../../");
           this.startControllerCore();
+          process.kill(process.pid);
           logger.warn(`Rebooted the controller core.`);
           break;
         case "Changed":
@@ -134,27 +115,36 @@ class NuRoon {
     }
   }
 
-  public static findOrCreate(
-    roonCore: BootstrapCore,
-    nuimo: NuimoControlDevice
-  ): NuRoon {
-    const existing = this.find(roonCore, nuimo);
-    if (existing) {
-      return existing;
-    } else {
-      const newPair = new NuRoon(roonCore, nuimo, false);
-      return newPair;
-    }
+  public static findWithIdPair(nuimoId: string, roonCoreId: string): NuRoon | undefined {
+    return this.pairs.find(
+      (p) => p && p.nuimo.id === nuimoId && roonCoreId === p.roonCore.id()
+    );
   }
 
-  public static unpair(
-    roonCore: BootstrapCore,
-    nuimo: NuimoControlDevice | NuimoLike
-  ): void {
-    const res = this.find(roonCore, nuimo);
-    if (res) {
-      res.disconnect();
-      delete this.pairs[this.pairs.indexOf(res)];
+  disconnect(): void {
+    this.nuimo.disconnect();
+    const i = NuRoon.pairs.indexOf(this);
+    if (i) {
+      delete NuRoon.pairs[i];
+    }
+    if (this.controllerProcess) {
+      this.controllerProcess.kill("SIGHUP");
+    }
+    this.active = false;
+    logger.info(`Disconnected Nuimo: ${this.nuimo.id}`);
+  }
+
+  ping(): void {
+    if (this.nuimo) {
+      this.nuimo.brightness = 0.1;
+      this.nuimo.displayGlyph(
+        filledGlyph.resize(1, 1), {
+          transition: DisplayTransition.Immediate,
+          timeoutMs: 10,
+        }
+      )
+    } else {
+      logger.info("Nuimo is not connected.");
     }
   }
 
@@ -177,13 +167,89 @@ class NuRoon {
     }
   }
 
-  public static findWithIdPair(
-    nuimoId: string,
-    roonCoreId: string
-  ): NuRoon | undefined {
-    return this.pairs.find(
-      (p) => p.nuimo.id === nuimoId && roonCoreId === p.roonCore.id()
-    );
+  public updateSettings() {
+    this.bindings.forEach((s) => s.unsubscribe());
+    const c = this.roonCore as ControllerCore;
+
+    ConfigStore.loadControllerConfig(this.nuimo.id).then((config) => {
+      const settings = config.settings;
+      const zone = settings["default_zone"];
+
+      if (settings && zone) {
+        const control = new Control(c.transport(), zone["output_id"]);
+
+        const simpleOperations: {
+          select: simpleControls;
+          swipeRight: simpleControls;
+          swipeLeft: simpleControls;
+          touchLeft: simpleControls;
+          touchRight: simpleControls;
+          swipeUp: simpleControls;
+          swipeDown: simpleControls;
+          touchTop: simpleControls;
+          touchBottom: simpleControls;
+        } = {
+          select: settings.select,
+          swipeRight: settings.swipeRight,
+          swipeLeft: settings.swipeLeft,
+          touchLeft: settings.touchLeft,
+          touchRight: settings.touchRight,
+          swipeUp: settings.swipeUp,
+          swipeDown: settings.swipeDown,
+          touchTop: settings.touchTop,
+          touchBottom: settings.touchBottom,
+        };
+
+        const parameterOperations: {
+          rotate: parameterControls;
+        } = {
+          rotate: "turnVolume",
+        };
+
+        const advancedParameters: {
+          rotary_damping_factor: number;
+          heartbeat_delay: number;
+        } = {
+          rotary_damping_factor: settings.rotary_damping_factor,
+          heartbeat_delay: settings.heartbeat_delay,
+        };
+
+        Object.entries(settings).forEach((entry) => {
+          const e = entry[0];
+          const c = entry[1];
+
+          if (e in simpleOperations) {
+            const s = fromEvent(this.nuimo, e).subscribe(() =>
+              control[c as simpleControls]()
+            );
+            this.bindings.push(s);
+          } else if (e in parameterOperations) {
+            const s = fromEvent(this.nuimo, e).subscribe((e) => {
+              const vol =
+                (e as [number])[0] * advancedParameters.rotary_damping_factor;
+              control[c as parameterControls](vol);
+              logger.info(c);
+              logger.info(vol);
+            });
+            this.bindings.push(s);
+          } else if (e in advancedParameters) {
+            const s = interval(
+              advancedParameters.heartbeat_delay * 1000
+            ).subscribe(() => {
+              if (control.isPlaying()) {
+                this.ping();
+              }
+            });
+            this.bindings.push(s);
+          } else {
+            logger.warn(`Unhandled operation: ${e}, ${util.inspect(c)}.`);
+          }
+        });
+        logger.info(`settings: ${util.inspect(settings)}`);
+      } else {
+        //Write default
+      }
+    });
   }
 
   private startControllerCore(): void {
