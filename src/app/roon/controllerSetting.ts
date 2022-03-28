@@ -18,8 +18,8 @@ const default_settings = {
   touchTop: "noop",
   touchBottom: "noop",
   rotate: "turnVolume",
-  rotary_damping_factor: 100,
-  heartbeat_delay: 5,
+  rotary_damping_factor: 150,
+  heartbeat_delay: 15,
 };
 
 const action_values = [

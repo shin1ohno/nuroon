@@ -48,7 +48,7 @@ const ConfigStore = {
     return this.loadConfigFile(ROON_DEFAULT_FILE)
       .then((jsonContent): nuimoDeviceConfigs => JSON.parse(jsonContent).x)
       .then((config): nuimoDeviceConfigs => {
-        if (config.nuimoDevices) {
+        if (config && config.nuimoDevices) {
           return config;
         } else {
           return { nuimoDevices: [] };
