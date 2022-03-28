@@ -5,8 +5,20 @@ enum Command {
   Stop = "stop",
 }
 
+type simpleControls =
+  | "togglePlay"
+  | "previousTrack"
+  | "nextTrack"
+  | "noop";
+
+type parameterControls = "turnVolume";
+
 class Control {
   constructor(private transport: any, private outputId: string) {}
+
+  noop(): void {
+    // do nothing
+  }
 
   togglePlay(): void {
     this.controlOutput(Command.TogglePlay);
@@ -34,6 +46,10 @@ class Control {
     return this.volumeObject().then(
       (v) => ((v.value - v.min) / (v.max - v.min)) * 100
     );
+  }
+
+  isPlaying(): boolean {
+    return true;
   }
 
   private volumeObject(): Promise<any> {
@@ -76,4 +92,4 @@ class Control {
   }
 }
 
-export { Control };
+export { Control, simpleControls, parameterControls };
