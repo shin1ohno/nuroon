@@ -7,7 +7,7 @@ import {
   NuimoControlDevice,
 } from "rocket-nuimo";
 import { pino } from "pino";
-import { ChildProcess, fork } from "child_process";
+import { ChildProcess, spawn } from "child_process";
 import { fromEvent, interval, Subscription } from "rxjs";
 import { Control, parameterControls, simpleControls } from "./roon/control";
 import { ConfigStore } from "./configStore";
@@ -103,8 +103,8 @@ class NuRoon {
     }
     if (this.controllerProcess) {
       this.controllerProcess.kill("SIGHUP");
-    } else if(this.roonCore instanceof ControllerCore) {
-      process.kill(process.pid, "SIGHUP")
+    } else if (this.roonCore instanceof ControllerCore) {
+      process.kill(process.pid, "SIGHUP");
     }
     this.active = false;
     delete NuRoon.pairs[NuRoon.pairs.indexOf(this)];
@@ -265,10 +265,20 @@ class NuRoon {
   }
 
   private startControllerCore(): void {
-    this.controllerProcess = fork("./src/index.ts", [
-      "controller",
-      this.nuimo.id,
-    ]).on("close",  (code) => {
+    this.controllerProcess = spawn(
+      process.argv[0], // node
+      [
+        "-r",
+        "ts-node/register",
+        process.argv[1], // TS or JS file
+        "controller",
+        this.nuimo.id,
+      ],
+      {
+        stdio: "inherit"
+      }
+    );
+    this.controllerProcess.on("close", (code) => {
       logger.fatal("child process exited with code " + code);
       this.startControllerCore();
     });
