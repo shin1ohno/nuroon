@@ -55,7 +55,11 @@ class Control {
 
   isPlaying(): Promise<boolean> {
     return this.roonOutput().then((o) => {
-      return this.transport.zone_by_zone_id(o.zone_id).state === "playing"
+      if(o) {
+        return this.transport.zone_by_zone_id(o.zone_id).state === "playing";
+      } else {
+        return false;
+      }
     })
   }
 
