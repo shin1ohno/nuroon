@@ -31,9 +31,13 @@ if (process.argv[2] === "controller") {
       nuRoon.connect()
         .then((success) => {
           if (success) {
-            nuimo.displayGlyph(linkGlyph);
-            nuRoon.startControl();
-            logger.info("Controller launched successfully");
+            nuRoon.startControl().then((nuRoon) => {
+              logger.info("Controller launched successfully");
+              return nuRoon;
+            }).catch(() => {
+              logger.error("Fatal");
+            });
+
           }
         })
         .catch((error) => logger.fatal(error));

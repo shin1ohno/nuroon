@@ -195,6 +195,7 @@ class ControllerSetting {
                 if (r) {
                   n.iAmHere();
                   n.updateSettings();
+                  n.disconnect();
                 }
               });
             }

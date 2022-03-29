@@ -29,19 +29,23 @@ class NuRoon {
     NuRoon.pairs.push(this);
   }
 
-  connect(): Promise<boolean> {
-    logger.info(`Connecting to Nuimo: ${this.nuimo.id}`);
-    return this.nuimo
-      .connect()
-      .then((res) => {
-        if (res) {
-          logger.info(`Connected to Nuimo: ${this.nuimo.id}`);
-        } else {
-          logger.info(`Failed to connect to Nuimo: ${this.nuimo.id}`);
-        }
-        return res;
-      })
-      .then((res) => (this.active = res));
+  public static all(): Array<NuRoon> {
+    return this.pairs;
+  }
+
+  public static deleteAll(): void {
+    this.pairs = [];
+  }
+
+  public static find(
+    roonCore: BootstrapCore,
+    nuimo: NuimoControlDevice | NuimoLike
+  ): NuRoon | undefined {
+    if (roonCore.id()) {
+      return this.findWithIdPair(nuimo.id, roonCore.id() as string);
+    } else {
+      return undefined;
+    }
   }
 
   public static findOrCreate(
@@ -54,32 +58,6 @@ class NuRoon {
     } else {
       return new NuRoon(roonCore, nuimo, false);
     }
-  }
-
-  exposeToRoonSettings(): Promise<NuRoon> {
-    if (this.roonCore instanceof BootstrapCore) {
-      return this.roonCore.exposeNuimoToSetting(this.nuimo).then((setting) => {
-        if (setting.connectToRoon) {
-          this.startControllerCore();
-        } else {
-          this.disconnect();
-        }
-        return this;
-      });
-    } else {
-      //controller doesn't need explicit setting exposure
-      return Promise.reject(this);
-    }
-  }
-
-  iAmHere(): Promise<NuRoon> {
-    const firstDigit = parseInt(this.nuimo.id[0], 10);
-    return this.nuimo
-      .displayGlyph(digitGlyphs[firstDigit || 0], {
-        transition: DisplayTransition.CrossFade,
-        timeoutMs: 5_000,
-      })
-      .then((_) => this);
   }
 
   public static unpair(
@@ -102,35 +80,18 @@ class NuRoon {
     );
   }
 
-  startControl(): void {
+  startControl(): Promise<NuRoon> {
     if (this.roonCore instanceof ControllerCore) {
-      const c = this.roonCore as ControllerCore;
-      c.transport().subscribe_zones((status: string, body: any) => {
-        // do nothing
-      });
-      c.transport().subscribe_outputs((status: string, body: any) => {
-        switch (status) {
-        case "Subscribed":
-          this.updateSettings();
-          break;
-        case "NetworkError":
-          this.disconnect();
-          logger.warn(`Controller was killed due to ${status}.`);
-          logger.warn(`Rebooting the controller core.`);
-          process.chdir("../../");
-          this.startControllerCore();
-          process.kill(process.pid);
-          logger.warn(`Rebooted the controller core.`);
-          break;
-        case "Changed":
-          //do nothing here
-          break;
-        default:
-          logger.warn(`Unexpected Roon subscription status: ${status}.`);
-        }
-      });
+      return this.updateSettings().then(n => n.connect()).then(_ => this);
     } else {
-      //do nothing
+      return this.roonCore.exposeNuimoToSetting(this.nuimo).then((setting) => {
+        if (setting.connectToRoon) {
+          this.startControllerCore();
+        } else {
+          this.disconnect();
+        }
+        return this;
+      });
     }
   }
 
@@ -147,42 +108,48 @@ class NuRoon {
     logger.info(`Disconnected Nuimo: ${this.nuimo.id}`);
   }
 
+  connect(): Promise<boolean> {
+    logger.info(`Connecting to Nuimo: ${this.nuimo.id}`);
+    return this.nuimo
+      .connect()
+      .then((res) => {
+        if (res) {
+          logger.info(`Connected to Nuimo: ${this.nuimo.id}`);
+        } else {
+          logger.info(`Failed to connect to Nuimo: ${this.nuimo.id}`);
+        }
+        return res;
+      })
+      .then((res) => (this.active = res));
+  }
+
+  iAmHere(): Promise<NuRoon> {
+    const firstDigit = parseInt(this.nuimo.id[0], 10);
+    return this.nuimo
+      .displayGlyph(digitGlyphs[firstDigit || 0], {
+        transition: DisplayTransition.CrossFade,
+        timeoutMs: 5_000,
+      })
+      .then((_) => this);
+  }
+
   ping(): void {
     if (this.nuimo) {
       this.nuimo.displayGlyph(filledGlyph.resize(1, 1), {
         transition: DisplayTransition.Immediate,
         timeoutMs: 50,
-        brightness: 0.1
+        brightness: 0.1,
       });
     } else {
       logger.info("Nuimo is not connected.");
     }
   }
 
-  public static all(): Array<NuRoon> {
-    return this.pairs;
-  }
-
-  public static deleteAll(): void {
-    this.pairs = [];
-  }
-
-  public static find(
-    roonCore: BootstrapCore,
-    nuimo: NuimoControlDevice | NuimoLike
-  ): NuRoon | undefined {
-    if (roonCore.id()) {
-      return this.findWithIdPair(nuimo.id, roonCore.id() as string);
-    } else {
-      return undefined;
-    }
-  }
-
-  public updateSettings() {
+  public updateSettings(): Promise<NuRoon> {
     this.bindings.forEach((s) => s.unsubscribe());
     const c = this.roonCore as ControllerCore;
 
-    ConfigStore.loadControllerConfig(this.nuimo.id).then((config) => {
+    return ConfigStore.loadControllerConfig(this.nuimo.id).then((config) => {
       const settings = config.settings;
       const zone = settings["default_zone"];
 
@@ -259,9 +226,9 @@ class NuRoon {
                     timeoutMs: 1000,
                     transition: DisplayTransition.Immediate,
                     brightness: 1,
-                  })
+                  });
                 }
-              })
+              });
             });
             this.bindings.push(s);
           } else if (eventName in advancedParameters) {
@@ -276,14 +243,16 @@ class NuRoon {
             });
             this.bindings.push(s);
           } else {
-            logger.warn(`Unhandled operation: ${eventName}, ${util.inspect(controlName)}.`);
+            logger.warn(
+              `Unhandled operation: ${eventName}, ${util.inspect(controlName)}.`
+            );
           }
         });
         logger.info(`settings: ${util.inspect(settings)}`);
       } else {
         //Write default
       }
-    });
+    }).then((_) => this);
   }
 
   private startControllerCore(): void {

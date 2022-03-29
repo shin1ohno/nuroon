@@ -33,7 +33,7 @@ class ControllerCore {
   }
 
   private subscribe(conf: roonPluginProps): Promise<ControllerCore> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const roon = new RoonApi(
         Object.assign(conf, {
           core_paired: (core: any) => {
@@ -42,7 +42,33 @@ class ControllerCore {
               `Subscribed to ${this.core.display_name} (${this.core.display_version}).`
             );
             this.roonStatus.set_status("Subscribed to core", false);
-            resolve(this);
+            this.transport().subscribe_zones((status: string, body: any) => {
+              switch (status) {
+              case "Subscribed":
+                this.transport().subscribe_outputs(
+                  (status: string, body: any) => {
+                    switch (status) {
+                    case "Subscribed":
+                      resolve(this);
+                      break;
+                    case "NetworkError":
+                      reject(this);
+                      break;
+                    case "Changed":
+                      break;
+                    default:
+                    }
+                  }
+                );
+                break;
+              case "NetworkError":
+                reject(this);
+                break;
+              case "Changed":
+                break;
+              default:
+              }
+            });
           },
           core_unpaired: (_: any) => {
             if (this.core) {

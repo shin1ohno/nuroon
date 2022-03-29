@@ -11,7 +11,7 @@ class Bootstrap {
       Bootstrap.startNuimoDiscovery().subscribe((nuimo) => {
         this.SetupWorkingDirectory(nuimo.id);
         NuRoon.findOrCreate(bootstrapCore, nuimo)
-          .exposeToRoonSettings()
+          .startControl()
           .then(nuRoon => logger.info(`Paired: Roon: ${nuRoon.roonCore.id()}, Nuimo: ${nuRoon.nuimo.id}`));
       });
     });

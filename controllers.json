@@ -34,6 +34,21 @@
                         "output_id": "170103b6b4a1dd24c3513106b882312e4c58",
                         "name": "Qutest"
                     },
+                    "longTouchLeft": {},
+                    "longTouchRight": {},
+                    "longTouchBottom": {},
+                    "select": "togglePlay",
+                    "swipeLeft": "previousTrack",
+                    "swipeRight": "nextTrack",
+                    "swipeUp": "noop",
+                    "swipeDown": "noop",
+                    "touchLeft": "previousTrack",
+                    "touchRight": "nextTrack",
+                    "touchTop": "noop",
+                    "touchBottom": "noop",
+                    "rotate": "turnVolume",
+                    "rotary_damping_factor": 25,
+                    "heartbeat_delay": 5,
                     "long_left": {},
                     "long_right": {},
                     "long_top": {},
@@ -48,9 +63,7 @@
                     "touch_top": "noop",
                     "touch_bottom": "noop",
                     "fly_left": "noop",
-                    "fly_right": "noop",
-                    "rotary_damping_factor": 25,
-                    "heartbeat_delay": 5
+                    "fly_right": "noop"
                 }
             },
             {
@@ -81,9 +94,24 @@
                 "nuimoId": "9aa6559046cab1552034ea0d04246917",
                 "settings": {
                     "default_zone": {
-                        "output_id": "17014d0980df75ec56864b0f40254ded81d9",
-                        "name": "Air default"
+                        "output_id": "170198e236817e736bbd314a165cb0b89e53",
+                        "name": "Study"
                     },
+                    "longTouchLeft": {},
+                    "longTouchRight": {},
+                    "longTouchBottom": {},
+                    "select": "togglePlay",
+                    "swipeLeft": "previousTrack",
+                    "swipeRight": "nextTrack",
+                    "swipeUp": "noop",
+                    "swipeDown": "noop",
+                    "touchLeft": "previousTrack",
+                    "touchRight": "nextTrack",
+                    "touchTop": "noop",
+                    "touchBottom": "noop",
+                    "rotate": "turnVolume",
+                    "rotary_damping_factor": 25,
+                    "heartbeat_delay": 5,
                     "long_left": {},
                     "long_right": {},
                     "long_top": {},
@@ -98,9 +126,7 @@
                     "touch_top": "noop",
                     "touch_bottom": "noop",
                     "fly_left": "noop",
-                    "fly_right": "noop",
-                    "rotary_damping_factor": 25,
-                    "heartbeat_delay": 5
+                    "fly_right": "noop"
                 }
             }
         ]

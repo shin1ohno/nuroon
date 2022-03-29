@@ -169,7 +169,7 @@ class BootstrapCore {
                 const n = NuRoon.find(this, { id: setting.id });
                 if (!n) return;
                 if (setting.connectToRoon) {
-                  n.exposeToRoonSettings();
+                  n.startControl();
                 } else {
                   n.disconnect();
                 }
