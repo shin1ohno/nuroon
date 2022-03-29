@@ -35,7 +35,8 @@ if (process.argv[2] === "controller") {
               logger.info("Controller launched successfully");
               return nuRoon;
             }).catch(() => {
-              logger.error("Fatal");
+              logger.fatal("Connection to Roon interrupted?")
+              process.kill(process.pid)
             });
 
           }

@@ -34,6 +34,7 @@ class NuRoon {
   }
 
   public static deleteAll(): void {
+    this.all().forEach((res) => res.disconnect());
     this.pairs = [];
   }
 
@@ -67,7 +68,6 @@ class NuRoon {
     const res = this.find(roonCore, nuimo);
     if (res) {
       res.disconnect();
-      delete this.pairs[this.pairs.indexOf(res)];
     }
   }
 
@@ -103,8 +103,11 @@ class NuRoon {
     }
     if (this.controllerProcess) {
       this.controllerProcess.kill("SIGHUP");
+    } else if(this.roonCore instanceof ControllerCore) {
+      process.kill(process.pid, "SIGHUP")
     }
     this.active = false;
+    delete NuRoon.pairs[NuRoon.pairs.indexOf(this)];
     logger.info(`Disconnected Nuimo: ${this.nuimo.id}`);
   }
 
@@ -250,16 +253,25 @@ class NuRoon {
         });
         logger.info(`settings: ${util.inspect(settings)}`);
       } else {
-        //Write default
+        //Do nothing
       }
-    }).then((_) => this);
+    }).then((_) => this).catch((reason) => {
+      logger.fatal(reason);
+      logger.fatal("Rebooting the controller process.");
+      this.disconnect();
+      return this;
+    });
+
   }
 
   private startControllerCore(): void {
     this.controllerProcess = fork("./src/index.ts", [
       "controller",
       this.nuimo.id,
-    ]);
+    ]).on("close",  (code) => {
+      logger.fatal("child process exited with code " + code);
+      this.startControllerCore();
+    });
   }
 }
 

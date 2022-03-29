@@ -100,6 +100,7 @@ class BootstrapCore {
           logger.info(
             `Unpaired ${this.core.display_name} (${this.core.display_version}).`
           );
+          roon.start_discovery();
         },
       })
     );

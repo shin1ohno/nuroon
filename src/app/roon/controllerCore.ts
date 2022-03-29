@@ -54,8 +54,6 @@ class ControllerCore {
                     case "NetworkError":
                       reject(this);
                       break;
-                    case "Changed":
-                      break;
                     default:
                     }
                   }
@@ -64,8 +62,6 @@ class ControllerCore {
               case "NetworkError":
                 reject(this);
                 break;
-              case "Changed":
-                break;
               default:
               }
             });
@@ -73,10 +69,10 @@ class ControllerCore {
           core_unpaired: (_: any) => {
             if (this.core) {
               logger.info(
-                `Unpaired ${this.core.display_name} (${this.core.display_version}).`
+                `Unpaired controller core: ${this.core.display_name} (${this.core.display_version}).`
               );
-              roon.start_discovery();
             }
+            reject(this);
           },
         })
       );

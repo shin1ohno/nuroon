@@ -1,3 +1,5 @@
+import { logger } from "../nuRoon";
+
 enum Command {
   TogglePlay = "playpause",
   NextTrack = "next",
@@ -18,8 +20,7 @@ type roonOutputState =
   | "previous";
 
 class Control {
-  constructor(private transport: any, private outputId: string) {
-  }
+  constructor(private transport: any, private outputId: string) {}
 
   noop(): Promise<roonOutputState> {
     return this.roonOutput().then((o) => o.state as roonOutputState);
@@ -55,12 +56,12 @@ class Control {
 
   isPlaying(): Promise<boolean> {
     return this.roonOutput().then((o) => {
-      if(o) {
+      if (o) {
         return this.transport.zone_by_zone_id(o.zone_id).state === "playing";
       } else {
         return false;
       }
-    })
+    });
   }
 
   private volumeObject(): Promise<any> {
