@@ -11,5 +11,27 @@
     "development": {
         "sentry_dsn": "https://3c52e0f69a9d49bfbeae563056bafecc@o1044896.ingest.sentry.io/6020136",
         "sentry_sample_rate": 1
+    },
+    "roonstate": {
+        "tokens": {
+            "687f0b89-e032-4405-a1f2-c5b0c408384a": "6cc460fd-744a-4c9c-b734-9ccaa22c0451"
+        },
+        "paired_core_id": "687f0b89-e032-4405-a1f2-c5b0c408384a"
+    },
+    "x": {
+        "nuimoDevices": [
+            {
+                "id": "9aa6559046cab1552034ea0d04246917",
+                "connectToRoon": false
+            },
+            {
+                "id": "c24d4dce93b159c147a916d714a32ce9",
+                "connectToRoon": false
+            },
+            {
+                "id": "95e42b17dc3dfe2f1060e2b4e8762dd0",
+                "connectToRoon": false
+            }
+        ]
     }
 }
