@@ -160,15 +160,6 @@ class ControllerSetting {
         ConfigStore.loadControllerConfig(this.nuimoId).then((config) =>
           callback(layout(ControllerSetting.configToSettings(config)))
         );
-        const n = NuRoon.findWithIdPair(this.nuimoId, this.roon.paired_core_id);
-        if (n) {
-          n.connect().then((r) => {
-            if (r) {
-              n.iAmHere();
-              n.updateSettings();
-            }
-          });
-        }
       },
       save_settings: (
         req: any,
@@ -186,19 +177,7 @@ class ControllerSetting {
             ControllerSetting.settingsToConfig(settings.values, this.nuimoId),
             this.nuimoId
           ).then(() => {
-            const n = NuRoon.findWithIdPair(
-              this.nuimoId,
-              this.roon.paired_core_id
-            );
-            if (n) {
-              n.connect().then((r) => {
-                if (r) {
-                  n.iAmHere();
-                  n.updateSettings();
-                  n.disconnect();
-                }
-              }).finally(() => n.disconnect());
-            }
+            NuRoon.restart();
           });
         }
       },

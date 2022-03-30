@@ -6,15 +6,15 @@ import {
   test,
   when,
 } from "@shin1ohno/nuroon/test";
-import { NuRoon } from "@shin1ohno/nuroon/nuRoon";
+import { BootstrapManager } from "@shin1ohno/nuroon/bootstrapManager";
 import { BootstrapCore } from "../src/app/roon/bootstrapCore";
 import { NuimoControlDevice } from "rocket-nuimo";
 
 const MockedNuimoControlDevice = mock(NuimoControlDevice);
 
 @suite
-class NuRoonTest {
-  private nuRoon!: NuRoon;
+class BootstrapManagerTest {
+  private nuRoon!: BootstrapManager;
   private roonCore!: BootstrapCore;
   private nuimo!: NuimoControlDevice;
 
@@ -23,16 +23,16 @@ class NuRoonTest {
     let i = 0;
     when(MockedNuimoControlDevice.id).thenReturn(`id-${i++}`);
     this.nuimo = instance(MockedNuimoControlDevice);
-    this.nuRoon = new NuRoon(this.roonCore, this.nuimo, false);
+    this.nuRoon = new BootstrapManager(this.roonCore, this.nuimo, false);
   }
 
   after() {
-    NuRoon.deleteAll();
+    BootstrapManager.deleteAll();
   }
 
   @test "pair() should pair the nuimo and the roon core"() {
-    expect(() => NuRoon.findOrCreate(this.roonCore, this.nuimo))
-      .to.change(() => NuRoon.all().length)
+    expect(() => BootstrapManager.findOrCreate(this.roonCore, this.nuimo))
+      .to.change(() => BootstrapManager.all().length)
       .by(1);
   }
 
@@ -40,25 +40,25 @@ class NuRoonTest {
     expect(() =>
       Array(10)
         .fill("")
-        .forEach((_) => NuRoon.findOrCreate(this.roonCore, this.nuimo))
+        .forEach((_) => BootstrapManager.findOrCreate(this.roonCore, this.nuimo))
     )
-      .to.change(() => NuRoon.all().length)
+      .to.change(() => BootstrapManager.all().length)
       .by(1);
   }
 
   @test "find() should find the pair"() {
-    const pair = NuRoon.findOrCreate(this.roonCore, this.nuimo);
-    const anotherPair = NuRoon.findOrCreate(
+    const pair = BootstrapManager.findOrCreate(this.roonCore, this.nuimo);
+    const anotherPair = BootstrapManager.findOrCreate(
       this.roonCore,
       instance(mock(NuimoControlDevice))
     );
-    expect(NuRoon.find(this.roonCore, this.nuimo))
+    expect(BootstrapManager.find(this.roonCore, this.nuimo))
       .to.eq(pair)
       .and.not.to.eq(anotherPair);
   }
 
   @test "find() can also find with fake Nuimo object"() {
-    const pair = NuRoon.findOrCreate(this.roonCore, this.nuimo);
-    expect(NuRoon.find(this.roonCore, { id: this.nuimo.id })).to.eq(pair);
+    const pair = BootstrapManager.findOrCreate(this.roonCore, this.nuimo);
+    expect(BootstrapManager.find(this.roonCore, { id: this.nuimo.id })).to.eq(pair);
   }
 }
