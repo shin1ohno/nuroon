@@ -197,7 +197,7 @@ class ControllerSetting {
                   n.updateSettings();
                   n.disconnect();
                 }
-              });
+              }).finally(() => n.disconnect());
             }
           });
         }

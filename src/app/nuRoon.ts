@@ -88,9 +88,11 @@ class NuRoon {
         if (setting.connectToRoon) {
           this.startControllerCore();
         } else {
-          this.disconnect();
+          //do nothing
         }
         return this;
+      }).finally(() => {
+        this.disconnect()
       });
     }
   }
@@ -107,7 +109,6 @@ class NuRoon {
       process.kill(process.pid, "SIGHUP");
     }
     this.active = false;
-    delete NuRoon.pairs[NuRoon.pairs.indexOf(this)];
     logger.info(`Disconnected Nuimo: ${this.nuimo.id}`);
   }
 
@@ -265,6 +266,8 @@ class NuRoon {
   }
 
   private startControllerCore(): void {
+    this.nuimo.disconnect();
+    this.active = false;
     this.controllerProcess = spawn(
       process.argv[0], // node
       [
