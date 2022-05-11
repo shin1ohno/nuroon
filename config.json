@@ -11,5 +11,8 @@
     "development": {
         "sentry_dsn": "https://3c52e0f69a9d49bfbeae563056bafecc@o1044896.ingest.sentry.io/6020136",
         "sentry_sample_rate": 1
+    },
+    "x": {
+        "nuimoDevices": []
     }
 }

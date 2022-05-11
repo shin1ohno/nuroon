@@ -1,0 +1,18 @@
+--- node_modules/rocket-nuimo/dist/device/nuimo-peripheral.js   2022-03-31 21:40:50.240016600 +0100
++++ node_modules/rocket-nuimo/dist/device/nuimo-peripheral.patched.js   2022-03-31 21:40:46.728016602 +0100
+@@ -305,6 +305,7 @@
+                 });
+                 // Begin service discovery...
+                 const services = await new Promise((resolveService, rejectServices) => {
++                   setTimeout(() => {
+                     peripheral.discoverServices([], async (err, discoveredServices) => {
+                         if (err) {
+                             rejectServices(new Error(err));
+@@ -312,6 +313,7 @@
+                         }
+                         resolveService(discoveredServices);
+                     });
++               }, 300);
+                 });
+                 debug(`Discovered ${services.length} services on device ${peripheral.uuid}`);
+                 // Make sure we are connecting to the right device

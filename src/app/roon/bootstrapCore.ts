@@ -11,6 +11,7 @@ import {
   roonPluginProps,
 } from "../configStore";
 import { Observable, Subscriber } from "rxjs";
+import { BootstrapManager } from "../bootstrapManager";
 
 class BootstrapCore {
   public core: any;
@@ -27,13 +28,13 @@ class BootstrapCore {
 
   exposeNuimoToSetting(nuimo: NuimoControlDevice): Promise<nuimoDeviceConfig> {
     return ConfigStore.loadRoonConfig()
-      .then((config): nuimoDeviceConfigs => {
+      .then((config) => {
         const existing: Array<nuimoDeviceConfig> = config.nuimoDevices;
         return {
           nuimoDevices: BootstrapCore.addOrUpdateNuimoDeviceSettings(
             existing,
             nuimo
-          ),
+          )
         };
       })
       .then((newConfig): nuimoDeviceConfig => {
@@ -167,12 +168,10 @@ class BootstrapCore {
                 return { id: key, connectToRoon: !!value };
               })
               .forEach((setting) => {
-                const n = NuRoon.find(this, { id: setting.id });
+                const n = BootstrapManager.find(this, { id: setting.id });
                 if (!n) return;
                 if (setting.connectToRoon) {
                   n.startControl();
-                } else {
-                  n.disconnect();
                 }
               });
           });

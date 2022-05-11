@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Bootstrap } from "./app/bootstrap";
 import { logger } from "./app/nuRoon";
 

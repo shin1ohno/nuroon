@@ -4,13 +4,14 @@ import { DeviceDiscoveryManager, NuimoControlDevice } from "rocket-nuimo";
 import { Observable } from "rxjs";
 import * as fs from "fs";
 import { ControllerCore } from "./roon/controllerCore";
+import { BootstrapManager } from "./bootstrapManager"
 
 class Bootstrap {
   static run(): void {
     Bootstrap.findRoonCore().subscribe((bootstrapCore) => {
       Bootstrap.startNuimoDiscovery().subscribe((nuimo) => {
         this.setupWorkingDirectory(nuimo.id);
-        NuRoon.findOrCreate(bootstrapCore, nuimo)
+        BootstrapManager.findOrCreate(bootstrapCore, nuimo)
           .startControl()
           .then(nuRoon => logger.info(`Paired: Roon: ${nuRoon.roonCore.id()}, Nuimo: ${nuRoon.nuimo.id}`));
       });
@@ -45,7 +46,6 @@ class Bootstrap {
               logger.fatal("Connection to Roon interrupted?")
               process.kill(process.pid)
             });
-
           }
         })
         .catch((error) => logger.fatal(error));
